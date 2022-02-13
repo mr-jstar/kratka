@@ -38,11 +38,12 @@ import javafx.stage.FileChooser;
  * @author jstar
  */
 public class Kratka extends Application {
+    final static int BASICNODESEP = 80;
 
     private int nodeSize = 16;
     private int leftSep = 10;
     private int topSep = 10;
-    private int nodeSep = 40;
+    private int nodeSep = BASICNODESEP;
 
     private GraphicsContext gc;
     private DirGridGraph graph;
@@ -100,10 +101,10 @@ public class Kratka extends Application {
 
             @Override
             public void handle(ActionEvent event) {
-                nodeSize = 16;
-                leftSep = 10;
-                topSep = 10;
-                nodeSep = 40;
+                //nodeSize = 16;
+                //leftSep = 10;
+                //topSep = 10;
+                //nodeSep = 40;
                 try {
                     String[] cr = sTextField.getText().split("\\s*x\\s*");
                     String[] mx = rTextField.getText().split("\\s*-\\s*");
@@ -321,6 +322,7 @@ public class Kratka extends Application {
         gc.setLineWidth(2);
         int rows = graph.getNumRows();
         int cols = graph.getNumColumns();
+        System.out.println("Node size: " + nodeSize + " sep: " + nodeSep);
         if (leftSep + cols * nodeSep + nodeSize / 2 > width) {
             nodeSep = (int) ((width - leftSep - nodeSize / 2) / cols);
         }
@@ -330,7 +332,7 @@ public class Kratka extends Application {
         if (nodeSep < 1) {
             return;
         }
-        nodeSize = (int) (nodeSize * nodeSep / 40);
+        nodeSize = (int) (nodeSize * nodeSep / BASICNODESEP);
         nodeSize = nodeSize < 10 ? 10 : nodeSize;
         System.out.println("Node size: " + nodeSize + " sep: " + nodeSep);
         int[][] rc = new int[graph.getNumNodes()][2];
