@@ -28,13 +28,15 @@ public class GraphPaths {
         farthest = 0;
         for (int i = 1; i < d.length; i++) {
             double x = d[i];
-            if (x < dMin) {
-                dMin = x;
-                src = i;
-            }
-            if (x > dMax) {
-                dMax = x;
-                farthest = i;
+            if( x != Double.POSITIVE_INFINITY) {
+                if (x < dMin) {
+                    dMin = x;
+                    src = i;
+                }
+                if (x > dMax) {
+                    dMax = x;
+                    farthest = i;
+                }
             }
         }
     }

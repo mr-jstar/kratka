@@ -13,6 +13,7 @@ import java.util.Set;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -27,6 +28,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
@@ -182,8 +185,13 @@ public class Kratka extends Application {
                 System.exit(0);
             }
         });
+        final Pane spacer0 = new Pane();
+        HBox.setHgrow(spacer0, Priority.ALWAYS);
+        spacer0.setMinSize(10, 1);
 
-        HBox btnBox = new HBox(30, phbox, abtn, rbtn, sbtn, dbtn, ebtn);
+        HBox btnBox = new HBox(30, phbox, abtn, rbtn, sbtn, dbtn, spacer0, ebtn);
+        btnBox.setPadding(new Insets(5, 5, 1, 5));
+        btnBox.setPrefWidth(plotWidth);
 
         FlowPane root = new FlowPane();
         root.getChildren().add(btnBox);
@@ -246,17 +254,33 @@ public class Kratka extends Application {
         edgeViewMinLabel = new Label("" + minWght);
         edgeViewMaxLabel = new Label("" + maxWght);
         Label esLabel = new Label("Edge color scale");
-        HBox lbox = new HBox((plotWidth  - 3*edgeViewMaxLabel.getMaxWidth()-esLabel.getMaxWidth())/2, edgeViewMinLabel, esLabel, edgeViewMaxLabel);
+        final Pane spacer1 = new Pane();
+        HBox.setHgrow(spacer1, Priority.ALWAYS);
+        spacer1.setMinSize(10, 1);
+        final Pane spacer2 = new Pane();
+        HBox.setHgrow(spacer2, Priority.ALWAYS);
+        spacer2.setMinSize(10, 1);
+        HBox lbox = new HBox(edgeViewMinLabel, spacer1, esLabel, spacer2, edgeViewMaxLabel);
+        lbox.setPrefWidth(plotWidth);
+        lbox.setStyle("-fx-background-color:#FAFAFA;");
         root.getChildren().add(lbox);
         root.getChildren().add(new ImageView(edgeCM.createColorScaleImage(plotWidth, 20, Orientation.HORIZONTAL)));
         nodeCM = new ColorMap(0, 1);
         nodeViewMinLabel = new Label("0");
         nodeViewMaxLabel = new Label("1");
         Label nsLabel = new Label("Node color scale");
-        HBox kbox = new HBox((plotWidth - 3*nodeViewMaxLabel.getMaxWidth()-nsLabel.getMaxWidth())/2, nodeViewMinLabel, nsLabel, nodeViewMaxLabel);
+        final Pane spacer3 = new Pane();
+        HBox.setHgrow(spacer3, Priority.ALWAYS);
+        spacer1.setMinSize(10, 1);
+        final Pane spacer4 = new Pane();
+        HBox.setHgrow(spacer4, Priority.ALWAYS);
+        spacer2.setMinSize(10, 1);
+        HBox kbox = new HBox(nodeViewMinLabel, spacer3, nsLabel, spacer4, nodeViewMaxLabel);
+        kbox.setPrefWidth(plotWidth);
+        kbox.setStyle("-fx-background-color:#FAFAFA;");
         root.getChildren().add(kbox);
 
-        Scene scene = new Scene(root, plotWidth, plotHeight + 80);
+        Scene scene = new Scene(root, plotWidth, plotHeight + 90);
 
         scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode()));
         scene.setOnKeyReleased(e -> pressedKeys.remove(e.getCode()));
