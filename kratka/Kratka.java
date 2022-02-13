@@ -1,6 +1,6 @@
 package kratka;
 
-import graphs.GridGraph;
+import graphs.DirGridGraph;
 import graphs.Edge;
 import graphs.GraphPaths;
 import graphs.GraphUtils;
@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -32,7 +31,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
 import javafx.stage.FileChooser;
 
 /**
@@ -47,7 +45,7 @@ public class Kratka extends Application {
     private int nodeSep = 40;
 
     private GraphicsContext gc;
-    private GridGraph graph;
+    private DirGridGraph graph;
     private Canvas canvas;
     private double minWght = 0;
     private double maxWght = 20;
@@ -116,7 +114,7 @@ public class Kratka extends Application {
                     edgeCM.setMin(minWght);
                     edgeCM.setMax(maxWght);
                     edgesPerNode = Double.parseDouble(eTextField.getText());
-                    graph = new GridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght, edgesPerNode);
+                    graph = new DirGridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght, edgesPerNode);
                     paths = null;
                     System.out.println("Draw graph " + graph.getNumColumns() + "x" + graph.getNumRows());
                     drawGraph(gc, canvas.getWidth(), canvas.getHeight());

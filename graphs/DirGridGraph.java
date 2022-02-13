@@ -11,14 +11,14 @@ import java.util.Random;
  *
  * @author jstar
  */
-public class GridGraph implements Graph {
+public class DirGridGraph implements Graph {
 
     private int numColumns;
     private int numRows;
     private HashMap<Integer, HashSet<Edge>> connectLists;
     private static final Random rand = new Random();
 
-    public GridGraph(int nC, int nR, double wMin, double wMax, double avgEdgesPerNode ) {
+    public DirGridGraph(int nC, int nR, double wMin, double wMax, double avgEdgesPerNode ) {
         numColumns = nC;
         numRows = nR;
         int nMax = numColumns * numRows;
@@ -28,30 +28,19 @@ public class GridGraph implements Graph {
             for (int r = 0; r < numRows; r++) {
                 int nn = c * numRows + r;
                 connectLists.put(nn, new HashSet<>());
-            }
-        }
-        for (int c = 1; c < numColumns; c++) {
-            for (int r = 1; r < numRows; r++) {
-                int n2 = c * numRows + r;
-                int n1 = n2 - 1;
-                int n0 = n1 - numRows;
-                int n3 = n0 + 1;
-                HashSet<Edge> l0 = connectLists.get(n0);
-                HashSet<Edge> l1 = connectLists.get(n1);
-                HashSet<Edge> l2 = connectLists.get(n2);
-                HashSet<Edge> l3 = connectLists.get(n3);
-                double w01 = wMin + dW * rand.nextDouble();
-                double w12 = wMin + dW * rand.nextDouble();
-                double w23 = wMin + dW * rand.nextDouble();
-                double w30 = wMin + dW * rand.nextDouble();
-                l0.add( new Edge(n0,n1,w01));
-                l1.add( new Edge(n1,n0,w01));
-                l1.add( new Edge(n1,n2,w12));
-                l2.add( new Edge(n2,n1,w12));
-                l2.add( new Edge(n2,n3,w23));
-                l3.add( new Edge(n3,n2,w23));
-                l3.add( new Edge(n3,n0,w30));
-                l0.add( new Edge(n0,n3,w30));
+                HashSet<Edge> list = connectLists.get(nn);
+                if (nn >= numRows && rand.nextDouble() < avgEdgesPerNode / 4 ) {
+                    list.add(new Edge(nn, nn - getNumRows(), wMin + dW * rand.nextDouble()));
+                }
+                if (nn < nMax - numRows && rand.nextDouble() < avgEdgesPerNode / 4 ) {
+                    list.add(new Edge(nn, nn + getNumRows(), wMin + dW * rand.nextDouble()));
+                }
+                if (r > 0 && rand.nextDouble() < avgEdgesPerNode / 4 ) {
+                    list.add(new Edge(nn, nn - 1, wMin + dW * rand.nextDouble()));
+                }
+                if (r < numRows - 1 && rand.nextDouble() < avgEdgesPerNode / 4 ) {
+                    list.add(new Edge(nn, nn + 1, wMin + dW * rand.nextDouble()));
+                }
             }
         }
     }
