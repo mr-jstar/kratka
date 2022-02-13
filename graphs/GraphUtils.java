@@ -65,6 +65,45 @@ public class GraphUtils {
         return new GraphPaths(d, p);
     }
 
+    public static GraphPaths dfs(Graph g) {
+        if (g == null || g.getNumNodes() < 1) {
+            return null;
+        }
+        int[] d = new int[g.getNumNodes()];
+        int[] f = new int[g.getNumNodes()];
+        int[] p = new int[g.getNumNodes()];
+        java.util.Arrays.fill(d, -1);    // discovery "time"  -1 means "not visited"
+        java.util.Arrays.fill(f, -1);    // finish "time"
+        java.util.Arrays.fill(p, -1);    // parent
+
+        int[] c = new int[g.getNumNodes()];
+        java.util.Arrays.fill(c, WHITE);
+
+        for (int n = 0; n < g.getNumNodes(); n++) {
+            if (c[n] == WHITE) {
+                d[n] = 0;
+                dfs_visit(g, n, d, f, p, c, 0);
+            }
+        }
+
+        return new GraphPaths(p,d,f);
+    }
+
+    private static void dfs_visit( Graph g, int currentNode, int [] d, int [] f, int []p, int [] c, int time ) {
+
+        c[currentNode] = GRAY;
+        d[currentNode] = time;
+        for (Edge e : g.getConnectionsList(currentNode)) {
+                int n = e.getNodeB();
+                if (c[n] == WHITE) {
+                    p[n] = currentNode;
+                    dfs_visit(g,n,d,f,p,c,time+1);
+                }
+        }
+        c[currentNode] = BLACK;
+        f[currentNode] = time + 1;
+    }
+
     private static class HeapPQ {
 
         private int[] h;

@@ -18,7 +18,7 @@ public class GridGraph implements Graph {
     private HashMap<Integer, HashSet<Edge>> connectLists;
     private static final Random rand = new Random();
 
-    public GridGraph(int nC, int nR, double wMin, double wMax) {
+    public GridGraph(int nC, int nR, double wMin, double wMax, double avgEdgesPerNode ) {
         numColumns = nC;
         numRows = nR;
         int nMax = numColumns * numRows;
@@ -29,16 +29,16 @@ public class GridGraph implements Graph {
                 int nn = c * numRows + r;
                 connectLists.put(nn, new HashSet<>());
                 HashSet<Edge> list = connectLists.get(nn);
-                if (nn >= numRows) {
+                if (nn >= numRows && rand.nextDouble() < avgEdgesPerNode / 4 ) {
                     list.add(new Edge(nn, nn - getNumRows(), wMin + dW * rand.nextDouble()));
                 }
-                if (nn < nMax - numRows) {
+                if (nn < nMax - numRows && rand.nextDouble() < avgEdgesPerNode / 4 ) {
                     list.add(new Edge(nn, nn + getNumRows(), wMin + dW * rand.nextDouble()));
                 }
-                if (r > 0) {
+                if (r > 0 && rand.nextDouble() < avgEdgesPerNode / 4 ) {
                     list.add(new Edge(nn, nn - 1, wMin + dW * rand.nextDouble()));
                 }
-                if (r < numRows - 1) {
+                if (r < numRows - 1 && rand.nextDouble() < avgEdgesPerNode / 4 ) {
                     list.add(new Edge(nn, nn + 1, wMin + dW * rand.nextDouble()));
                 }
             }

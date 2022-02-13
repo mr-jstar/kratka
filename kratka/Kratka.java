@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -49,6 +50,8 @@ public class Kratka extends Application {
     private double maxWght = 20;
     private final ColorMap edgeCM = new ColorMap(minWght, maxWght);
 
+    private double edgesPerNode = 4;
+
     private ColorMap nodeCM;
     private Label nodeViewMinLabel;
     private Label nodeViewMaxLabel;
@@ -56,28 +59,39 @@ public class Kratka extends Application {
     private Label edgeViewMaxLabel;
 
     private int plotWidth = 1000;
-    private int plotHeight = 1000;
+    private int plotHeight = 800;
 
     private GraphPaths paths = null;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
+
+    //private final Random random = new Random();
 
     @Override
     public void start(Stage primaryStage) {
 
         Label slabel = new Label("Grid size: ");
         TextField sTextField = new TextField();
+        sTextField.setMaxWidth(100);
         sTextField.setAlignment(Pos.CENTER);
         sTextField.setText("10 x 10");
         HBox shbox = new HBox(sTextField);
 
         Label rlabel = new Label("Edge weight range: ");
         TextField rTextField = new TextField();
+        rTextField.setMaxWidth(100);
         rTextField.setAlignment(Pos.CENTER);
         rTextField.setText(minWght + " - " + maxWght);
         HBox rhbox = new HBox(rTextField);
 
-        HBox phbox = new HBox(5, slabel, shbox, rlabel, rhbox);
+        Label elabel = new Label("Edges per node: ");
+        TextField eTextField = new TextField();
+        eTextField.setMaxWidth(40);
+        eTextField.setAlignment(Pos.CENTER);
+        eTextField.setText(""+edgesPerNode);
+        HBox ehbox = new HBox(eTextField);
+
+        HBox phbox = new HBox(5, slabel, shbox, rlabel, rhbox, elabel, ehbox);
 
         Button abtn = new Button();
         abtn.setText("Generate");
@@ -98,7 +112,8 @@ public class Kratka extends Application {
                     edgeViewMaxLabel.setText("" + maxWght);
                     edgeCM.setMin(minWght);
                     edgeCM.setMax(maxWght);
-                    graph = new GridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght);
+                    edgesPerNode = Double.parseDouble(eTextField.getText());
+                    graph = new GridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght, edgesPerNode);
                     paths = null;
                     System.out.println("Draw graph " + graph.getNumColumns() + "x" + graph.getNumRows());
                     drawGraph(gc, canvas.getWidth(), canvas.getHeight());
@@ -168,7 +183,7 @@ public class Kratka extends Application {
             }
         });
 
-        HBox btnBox = new HBox(40, phbox, abtn, rbtn, sbtn, dbtn, ebtn);
+        HBox btnBox = new HBox(30, phbox, abtn, rbtn, sbtn, dbtn, ebtn);
 
         FlowPane root = new FlowPane();
         root.getChildren().add(btnBox);
@@ -193,6 +208,9 @@ public class Kratka extends Application {
                         } else if( pressedKeys.contains(KeyCode.B) ) {
                             System.out.println("BFS");
                             paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
+                        } else if( pressedKeys.contains(KeyCode.Z)) {
+                            System.out.println("DFS");
+                            paths = GraphUtils.dfs(graph);
                         }
                     }
                     if (e.getButton() == MouseButton.SECONDARY) {
@@ -227,16 +245,18 @@ public class Kratka extends Application {
 
         edgeViewMinLabel = new Label("" + minWght);
         edgeViewMaxLabel = new Label("" + maxWght);
-        HBox lbox = new HBox(plotWidth / 2, edgeViewMinLabel, new Label("Edge color scale"), edgeViewMaxLabel);
+        Label esLabel = new Label("Edge color scale");
+        HBox lbox = new HBox((plotWidth  - 3*edgeViewMaxLabel.getMaxWidth()-esLabel.getMaxWidth())/2, edgeViewMinLabel, esLabel, edgeViewMaxLabel);
         root.getChildren().add(lbox);
         root.getChildren().add(new ImageView(edgeCM.createColorScaleImage(plotWidth, 20, Orientation.HORIZONTAL)));
         nodeCM = new ColorMap(0, 1);
         nodeViewMinLabel = new Label("0");
         nodeViewMaxLabel = new Label("1");
-        HBox kbox = new HBox(plotWidth / 2, nodeViewMinLabel, new Label("Node color scale"), nodeViewMaxLabel);
+        Label nsLabel = new Label("Node color scale");
+        HBox kbox = new HBox((plotWidth - 3*nodeViewMaxLabel.getMaxWidth()-nsLabel.getMaxWidth())/2, nodeViewMinLabel, nsLabel, nodeViewMaxLabel);
         root.getChildren().add(kbox);
 
-        Scene scene = new Scene(root, plotHeight, plotHeight + 80);
+        Scene scene = new Scene(root, plotWidth, plotHeight + 80);
 
         scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode()));
         scene.setOnKeyReleased(e -> pressedKeys.remove(e.getCode()));
@@ -342,6 +362,7 @@ public class Kratka extends Application {
         }
     }
 
+    /*
     private void drawShapes(GraphicsContext gc) {
         gc.setFill(Color.GREEN);
         gc.setStroke(Color.BLUE);
@@ -364,6 +385,8 @@ public class Kratka extends Application {
         gc.strokePolyline(new double[]{110, 140, 110, 140},
                 new double[]{210, 210, 240, 240}, 4);
     }
+    */
+
 
     /**
      * @param args the command line arguments
