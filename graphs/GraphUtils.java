@@ -86,22 +86,72 @@ public class GraphUtils {
             }
         }
 
-        return new GraphPaths(p,d,f);
+        return new GraphPaths(p, d, f);
     }
 
-    private static void dfs_visit( Graph g, int currentNode, int [] d, int [] f, int []p, int [] c, int time ) {
+    private static void dfs_visit(Graph g, int currentNode, int[] d, int[] f, int[] p, int[] c, int time) {
 
         c[currentNode] = GRAY;
         d[currentNode] = time;
         for (Edge e : g.getConnectionsList(currentNode)) {
-                int n = e.getNodeB();
-                if (c[n] == WHITE) {
-                    p[n] = currentNode;
-                    dfs_visit(g,n,d,f,p,c,time+1);
-                }
+            int n = e.getNodeB();
+            if (c[n] == WHITE) {
+                p[n] = currentNode;
+                dfs_visit(g, n, d, f, p, c, time + 1);
+            }
         }
         c[currentNode] = BLACK;
         f[currentNode] = time + 1;
+    }
+
+    public static GraphPaths dfs_iterative(Graph g) {
+        if (g == null || g.getNumNodes() < 1) {
+            return null;
+        }
+        int[] d = new int[g.getNumNodes()];
+        int[] f = new int[g.getNumNodes()];
+        int[] p = new int[g.getNumNodes()];
+        java.util.Arrays.fill(d, -1);    // discovery "time"  -1 means "not visited"
+        java.util.Arrays.fill(f, -1);    // finish "time"
+        java.util.Arrays.fill(p, -1);    // parent
+
+        int[] c = new int[g.getNumNodes()];
+        java.util.Arrays.fill(c, WHITE);
+
+        int time = 0;
+        java.util.Deque<Integer> stack = new java.util.ArrayDeque<>();
+        for (int n = 0; n < g.getNumNodes(); n++) {
+            if (c[n] == WHITE) {
+                c[n] = GRAY;
+                d[n] = ++time;
+                stack.push(n);
+                while (!stack.isEmpty()) {
+                    int currentNode = stack.pop();
+                    boolean isFinished = true;
+                    for (Edge e : g.getConnectionsList(currentNode)) {
+                        int neighbour = e.getNodeB();
+                        if (c[neighbour] == WHITE) {
+                            c[neighbour] = GRAY;
+                            p[neighbour] = currentNode;
+                            d[neighbour] = ++time;
+                            stack.push(neighbour);
+                            isFinished = false;
+                            break;
+                        }
+                    }
+                    if (isFinished) {
+                        c[currentNode] = BLACK;
+                        f[currentNode] = ++time;
+                        if (p[currentNode] != -1) {
+                            stack.push(p[currentNode]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return new GraphPaths(p, d, f);
+
     }
 
     private static class HeapPQ {

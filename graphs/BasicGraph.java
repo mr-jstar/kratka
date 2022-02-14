@@ -11,14 +11,14 @@ import java.util.Random;
  *
  * @author jstar
  */
-public class GridGraph implements Graph {
+public class BasicGraph implements Graph {
 
     private int numColumns;
     private int numRows;
     private HashMap<Integer, HashSet<Edge>> connectLists;
     private static final Random rand = new Random();
 
-    public GridGraph(int nC, int nR, double wMin, double wMax, double avgEdgesPerNode ) {
+    public BasicGraph(int nC, int nR, double wMin, double wMax, double avgEdgesPerNode ) {
         numColumns = nC;
         numRows = nR;
         int nMax = numColumns * numRows;

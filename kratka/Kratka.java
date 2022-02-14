@@ -38,11 +38,16 @@ import javafx.stage.FileChooser;
  * @author jstar
  */
 public class Kratka extends Application {
-    final static int BASICNODESEP = 80;
 
-    private int nodeSize = 16;
+    final static int MINNODESIZE = 10;
+    final static int BASICNODESEP = 80;
+    final static int BASICNODESIZE = 20;
+    final static int DEFAULTWIDTH = 1200;
+    final static int DEFAULTHEIGHT = 1000;
+
     private int leftSep = 10;
     private int topSep = 10;
+    private int nodeSize = BASICNODESIZE;
     private int nodeSep = BASICNODESEP;
 
     private GraphicsContext gc;
@@ -60,15 +65,14 @@ public class Kratka extends Application {
     private Label edgeViewMinLabel;
     private Label edgeViewMaxLabel;
 
-    private int plotWidth = 1000;
-    private int plotHeight = 800;
+    private int plotWidth = DEFAULTWIDTH;
+    private int plotHeight = DEFAULTHEIGHT;
 
     private GraphPaths paths = null;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
 
     //private final Random random = new Random();
-
     @Override
     public void start(Stage primaryStage) {
 
@@ -90,7 +94,7 @@ public class Kratka extends Application {
         TextField eTextField = new TextField();
         eTextField.setMaxWidth(40);
         eTextField.setAlignment(Pos.CENTER);
-        eTextField.setText(""+edgesPerNode);
+        eTextField.setText("" + edgesPerNode);
         HBox ehbox = new HBox(eTextField);
 
         HBox phbox = new HBox(5, slabel, shbox, rlabel, rhbox, elabel, ehbox);
@@ -101,10 +105,6 @@ public class Kratka extends Application {
 
             @Override
             public void handle(ActionEvent event) {
-                //nodeSize = 16;
-                //leftSep = 10;
-                //topSep = 10;
-                //nodeSep = 40;
                 try {
                     String[] cr = sTextField.getText().split("\\s*x\\s*");
                     String[] mx = rTextField.getText().split("\\s*-\\s*");
@@ -118,6 +118,7 @@ public class Kratka extends Application {
                     graph = new DirGridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght, edgesPerNode);
                     paths = null;
                     System.out.println("Draw graph " + graph.getNumColumns() + "x" + graph.getNumRows());
+                    nodeSep = BASICNODESEP;
                     drawGraph(gc, canvas.getWidth(), canvas.getHeight());
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
@@ -171,7 +172,7 @@ public class Kratka extends Application {
                             System.out.println("NOT SAVED: " + e.getLocalizedMessage());
                         }
                     }
-               }
+                }
             }
         });
 
@@ -209,15 +210,18 @@ public class Kratka extends Application {
                 if (graph != null && c >= 0 && c < graph.getNumColumns() && r >= 0 && r < graph.getNumRows()) {
                     System.out.println("Node # " + graph.nodeNum(r, c));
                     if (e.getButton() == MouseButton.PRIMARY) {
-                        if( pressedKeys.contains(KeyCode.D) ) {
+                        if (pressedKeys.contains(KeyCode.D)) {
                             System.out.println("Dijkstra");
                             paths = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
-                        } else if( pressedKeys.contains(KeyCode.B) ) {
+                        } else if (pressedKeys.contains(KeyCode.B)) {
                             System.out.println("BFS");
                             paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
-                        } else if( pressedKeys.contains(KeyCode.Z)) {
+                        } else if (pressedKeys.contains(KeyCode.Z)) {
                             System.out.println("DFS");
                             paths = GraphUtils.dfs(graph);
+                        } else if (pressedKeys.contains(KeyCode.X)) {
+                            System.out.println("Iterative DFS");
+                            paths = GraphUtils.dfs_iterative(graph);
                         }
                     }
                     if (e.getButton() == MouseButton.SECONDARY) {
@@ -333,7 +337,7 @@ public class Kratka extends Application {
             return;
         }
         nodeSize = (int) (nodeSize * nodeSep / BASICNODESEP);
-        nodeSize = nodeSize < 10 ? 10 : nodeSize;
+        nodeSize = nodeSize < MINNODESIZE ? MINNODESIZE : nodeSize;
         System.out.println("Node size: " + nodeSize + " sep: " + nodeSep);
         int[][] rc = new int[graph.getNumNodes()][2];
         for (int n = 0; n < graph.getNumNodes(); n++) {
@@ -409,9 +413,7 @@ public class Kratka extends Application {
         gc.strokePolyline(new double[]{110, 140, 110, 140},
                 new double[]{210, 210, 240, 240}, 4);
     }
-    */
-
-
+     */
     /**
      * @param args the command line arguments
      */

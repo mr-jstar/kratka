@@ -11,6 +11,8 @@ public interface Graph {
 
     public int getNumNodes();
 
+    public String getNodeLabel(int n);
+
     public Set<Edge> getConnectionsList(int nodeNumber);
 
     public void save(String path) throws IOException;

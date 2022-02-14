@@ -18,7 +18,7 @@ public class DirGridGraph implements Graph {
     private HashMap<Integer, HashSet<Edge>> connectLists;
     private static final Random rand = new Random();
 
-    public DirGridGraph(int nC, int nR, double wMin, double wMax, double avgEdgesPerNode ) {
+    public DirGridGraph(int nC, int nR, double wMin, double wMax, double avgEdgesPerNode) {
         numColumns = nC;
         numRows = nR;
         int nMax = numColumns * numRows;
@@ -29,16 +29,16 @@ public class DirGridGraph implements Graph {
                 int nn = c * numRows + r;
                 connectLists.put(nn, new HashSet<>());
                 HashSet<Edge> list = connectLists.get(nn);
-                if (nn >= numRows && rand.nextDouble() < avgEdgesPerNode / 4 ) {
+                if (nn >= numRows && rand.nextDouble() < avgEdgesPerNode / 4) {
                     list.add(new Edge(nn, nn - getNumRows(), wMin + dW * rand.nextDouble()));
                 }
-                if (nn < nMax - numRows && rand.nextDouble() < avgEdgesPerNode / 4 ) {
+                if (nn < nMax - numRows && rand.nextDouble() < avgEdgesPerNode / 4) {
                     list.add(new Edge(nn, nn + getNumRows(), wMin + dW * rand.nextDouble()));
                 }
-                if (r > 0 && rand.nextDouble() < avgEdgesPerNode / 4 ) {
+                if (r > 0 && rand.nextDouble() < avgEdgesPerNode / 4) {
                     list.add(new Edge(nn, nn - 1, wMin + dW * rand.nextDouble()));
                 }
-                if (r < numRows - 1 && rand.nextDouble() < avgEdgesPerNode / 4 ) {
+                if (r < numRows - 1 && rand.nextDouble() < avgEdgesPerNode / 4) {
                     list.add(new Edge(nn, nn + 1, wMin + dW * rand.nextDouble()));
                 }
             }
@@ -63,7 +63,7 @@ public class DirGridGraph implements Graph {
      * @return the column number given node number
      */
     public int col(int n) {
-        return (int)(n / numRows);
+        return (int) (n / numRows);
     }
 
     /**
@@ -72,6 +72,18 @@ public class DirGridGraph implements Graph {
     @Override
     public int getNumNodes() {
         return numColumns * numRows;
+    }
+
+    /**
+     * @return the label of given node
+     */
+    @Override
+    public String getNodeLabel(int n) {
+        if (n >= 0 && n < numColumns * numRows) {
+            return "" + n;
+        } else {
+            return null;
+        }
     }
 
     /**
