@@ -11,11 +11,11 @@ import java.util.HashSet;
  *
  * @author jstar
  */
-public class BasicGraph implements Graph, GraphBuilder {
+public class BasicGraph implements Graph {
 
-    private int maxNodeNo = -1;
-    private HashMap<Integer, HashSet<Edge>> connectLists = new HashMap<>();
-    private HashMap<Integer, String> nodeLabels = new HashMap<>();
+    protected int nextNodeNo = 0;
+    protected HashMap<Integer, HashSet<Edge>> connectLists = new HashMap<>();
+    protected HashMap<Integer, String> nodeLabels = new HashMap<>();
 
     private double minEdgeWeight, maxEdgeWeight;
 
@@ -60,7 +60,7 @@ public class BasicGraph implements Graph, GraphBuilder {
     private void updateEdgeWeight() {
         minEdgeWeight = Double.POSITIVE_INFINITY;
         maxEdgeWeight = Double.NEGATIVE_INFINITY;
-        for (int i = 0; i < maxNodeNo; i++) {
+        for (int i = 0; i < nextNodeNo; i++) {
             for (Edge e : connectLists.get(i)) {
                 double w = e.getWeight();
                 if (w < minEdgeWeight) {
@@ -71,6 +71,9 @@ public class BasicGraph implements Graph, GraphBuilder {
                 }
 
             }
+        }
+        if (minEdgeWeight == Double.POSITIVE_INFINITY && maxEdgeWeight == Double.NEGATIVE_INFINITY) {
+            minEdgeWeight = maxEdgeWeight = 0.0;
         }
     }
 
@@ -88,8 +91,8 @@ public class BasicGraph implements Graph, GraphBuilder {
         if (connectLists == null) {
             pw.println("0");
         } else {
-            pw.println(maxNodeNo);
-            for (int i = 0; i < maxNodeNo; i++) {
+            pw.println(nextNodeNo);
+            for (int i = 0; i < nextNodeNo; i++) {
                 if (connectLists.containsKey(i)) {
                     HashSet<Edge> edges = connectLists.get(i);
                     pw.print("\t");
@@ -113,9 +116,9 @@ public class BasicGraph implements Graph, GraphBuilder {
         try {
             BufferedReader br = new BufferedReader(r);
             String[] words = br.readLine().split("\\s*");
-            maxNodeNo = Integer.parseInt(words[0]);
+            nextNodeNo = Integer.parseInt(words[0]);
             connectLists.clear();
-            for (int i = 0; i < maxNodeNo; i++) {
+            for (int i = 0; i < nextNodeNo; i++) {
                 HashSet<Edge> edges = new HashSet<>();
                 words = br.readLine().split("[\\s:]*");
                 for (int j = 0; j < words.length; j += 2) {
@@ -123,50 +126,8 @@ public class BasicGraph implements Graph, GraphBuilder {
                 }
                 connectLists.put(i, edges);
             }
-        } catch (ArrayIndexOutOfBoundsException| NumberFormatException e) {
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new IOException("GridGraph can not read graph: " + e.getMessage());
         }
-    }
-
-    @Override
-    public void addNode() {
-        connectLists.put(++maxNodeNo, new HashSet<>());
-        nodeLabels.put(maxNodeNo, "" + maxNodeNo);
-    }
-
-    @Override
-    public void addNode(int number) {
-        if (!connectLists.containsKey(number)) {
-            connectLists.put(number, new HashSet<>());
-            nodeLabels.put(number, "" + number);
-            if (number > maxNodeNo) {
-                maxNodeNo = number;
-            }
-        }
-    }
-
-    @Override
-    public void addEdge(int first, int second) {
-        addEdge(first, second, 1.0);
-    }
-
-    @Override
-    public void addEdge(int first, int second, double weight) {
-        addNode(first);
-        addNode(second);
-        connectLists.get(first).add(new Edge(first, second, weight));
-    }
-
-    @Override
-    public void setNodeLabel(int n, String label) {
-        if (nodeLabels.containsKey(n)) {
-            nodeLabels.remove(n);
-        }
-        nodeLabels.put(n, label);
-    }
-
-    @Override
-    public Graph getGraph() {
-        return this;
     }
 }

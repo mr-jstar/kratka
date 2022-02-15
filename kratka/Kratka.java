@@ -242,8 +242,17 @@ public class Kratka extends Application {
 
         FlowPane root = new FlowPane();
 
-        root.getChildren()
-                .add(btnBox);
+        root.getChildren().add(btnBox);
+
+        ObservableList<String> items = FXCollections.observableArrayList(
+                "BFS", "DFS Recursive", "DFS Iterative", "Dijkstra");
+        algorithms.getSelectionModel().select("BFS");
+        algorithms.setItems(items);
+        algorithms.setPrefWidth(200);
+        algorithms.setPrefHeight(25);
+
+        HBox obox = new HBox(30, new Label("Operation:"), algorithms);
+        root.getChildren().add(obox);
 
         canvas = new Canvas(plotWidth, plotHeight);
 
@@ -256,23 +265,32 @@ public class Kratka extends Application {
 
                 System.out.println("(" + e.getX() + "," + e.getY() + ") -> " + "(" + c + "," + r + ")");
 
-                System.out.println(algorithms.getSelectionModel().getSelectedItem());
+                String currentAlgorithm = algorithms.getSelectionModel().getSelectedItem();
 
                 if (graph != null && c >= 0 && c < graph.getNumColumns() && r >= 0 && r < graph.getNumRows()) {
                     System.out.println("Node # " + graph.nodeNum(r, c));
                     if (e.getButton() == MouseButton.PRIMARY) {
-                        if (pressedKeys.contains(KeyCode.D)) {
+                        if (currentAlgorithm.equals("Dijkstra")) {
                             System.out.println("Dijkstra");
                             paths = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
-                        } else if (pressedKeys.contains(KeyCode.B)) {
+                        } else if (currentAlgorithm.equals("BFS")) {
                             System.out.println("BFS");
                             paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
-                        } else if (pressedKeys.contains(KeyCode.Z)) {
-                            System.out.println("DFS");
+                        } else if (currentAlgorithm.equals("DFS Recursive")) {
+                            System.out.println("DFS Recursive");
                             paths = GraphUtils.dfs(graph);
-                        } else if (pressedKeys.contains(KeyCode.X)) {
+                        } else if (currentAlgorithm.equals("DFS Iterative")) {
                             System.out.println("Iterative DFS");
                             paths = GraphUtils.dfs_iterative(graph);
+                        }
+                        drawGraph(gc, canvas.getWidth(), canvas.getHeight());
+                        if (paths != null) {
+                            nodeCM = new ColorMap(paths.dMin, paths.dMax);
+                            nodeViewMinLabel.setText("" + paths.dMin);
+                            nodeViewMaxLabel.setText("" + paths.dMax);
+                            colorNodes(gc, canvas.getWidth(), canvas.getHeight(), paths.d);
+                            ArrayList<Integer> longestPath = decodePathTo(paths.farthest);
+                            printPath(longestPath);
                         }
                     }
                     if (e.getButton() == MouseButton.SECONDARY) {
@@ -284,17 +302,7 @@ public class Kratka extends Application {
                         } else {
                             System.out.println("No paths defined!");
                         }
-                    } else {
-                        drawGraph(gc, canvas.getWidth(), canvas.getHeight());
-                        if (paths != null) {
-                            nodeCM = new ColorMap(paths.dMin, paths.dMax);
-                            nodeViewMinLabel.setText("" + paths.dMin);
-                            nodeViewMaxLabel.setText("" + paths.dMax);
-                            colorNodes(gc, canvas.getWidth(), canvas.getHeight(), paths.d);
-                            ArrayList<Integer> longestPath = decodePathTo(paths.farthest);
-                            printPath(longestPath);
-                        }
-                    }
+                    } 
                 }
 
             }
@@ -348,16 +356,6 @@ public class Kratka extends Application {
 
         kbox.setStyle("-fx-background-color:#FAFAFA;");
         root.getChildren().add(kbox);
-
-        ObservableList<String> items = FXCollections.observableArrayList(
-                "BFS", "DFS Recursive", "DFS Iterative", "Dijkstra");
-        algorithms.getSelectionModel().select("BFS");
-        algorithms.setItems(items);
-        algorithms.setPrefWidth(200);
-        algorithms.setPrefHeight(25);
-
-        HBox obox = new HBox(30, new Label("Operation:"), algorithms);
-        root.getChildren().add(obox);
 
         Scene scene = new Scene(root, plotWidth, plotHeight + 110);
 

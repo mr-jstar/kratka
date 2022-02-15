@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -12,26 +11,26 @@ import java.util.Random;
  *
  * @author jstar
  */
-public class GridGraph implements Graph {
+public class GridGraph extends BasicGraph {
 
     private int numColumns;
     private int numRows;
-    private HashMap<Integer, HashSet<Edge>> connectLists;
     private static final Random rand = new Random();
 
     private double minEdgeWeight, maxEdgeWeight;
 
     public GridGraph() {
+        super();
         numColumns = numRows = 0;
-        connectLists = new HashMap<>();
     }
 
     public GridGraph(int nC, int nR, double wMin, double wMax, double avgEdgesPerNode) {
+        super();
         numColumns = nC;
         numRows = nR;
+        nextNodeNo = numColumns * numRows;
         int nMax = numColumns * numRows;
         double dW = wMax - wMin;
-        connectLists = new HashMap<>();
         for (int c = 0; c < numColumns; c++) {
             for (int r = 0; r < numRows; r++) {
                 int nn = c * numRows + r;
@@ -117,50 +116,6 @@ public class GridGraph implements Graph {
      */
     public int getNumRows() {
         return numRows;
-    }
-
-    /**
-     * @return the minimum of Edges' weights
-     */
-    @Override
-    public double getMinEdgeWeight() {
-        updateEdgeWeight();
-        return minEdgeWeight;
-    }
-
-    /**
-     * @return the maximum of Edges' weights
-     */
-    @Override
-    public double getMaxEdgeWeight() {
-        updateEdgeWeight();
-        return maxEdgeWeight;
-    }
-
-    private void updateEdgeWeight() {
-        minEdgeWeight = Double.POSITIVE_INFINITY;
-        maxEdgeWeight = Double.NEGATIVE_INFINITY;
-        for (int i = 0; i < numColumns * numRows; i++) {
-            for (Edge e : connectLists.get(i)) {
-                double w = e.getWeight();
-                if (w < minEdgeWeight) {
-                    minEdgeWeight = w;
-                }
-                if (w > maxEdgeWeight) {
-                    maxEdgeWeight = w;
-                }
-
-            }
-        }
-    }
-
-    /**
-     * @param n - node number
-     * @return the connectLists
-     */
-    @Override
-    public HashSet<Edge> getConnectionsList(int n) {
-        return connectLists.get(n);
     }
 
     @Override
