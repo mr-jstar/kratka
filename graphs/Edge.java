@@ -6,7 +6,7 @@ import java.util.Objects;
  *
  * @author jstar
  */
-public class Edge {
+public class Edge implements Comparable<Edge> {
 
     private int nodeA;
     private int nodeB;
@@ -73,6 +73,11 @@ public class Edge {
     @Override
     public int hashCode() {
         return 7*nodeA + 17*nodeB + 251*Objects.hash(weight);
+    }
+
+    @Override
+    public int compareTo( Edge o ) {
+        return o.weight > weight ? -1 : (o.weight == weight ? 0 : 1);
     }
 
 }

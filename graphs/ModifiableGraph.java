@@ -8,6 +8,27 @@ import java.util.HashSet;
  */
 public class ModifiableGraph extends BasicGraph implements GraphBuilder {
 
+    @Override
+    public boolean hasNode(int number) {
+        return connectLists.containsKey(number);
+    }
+
+    @Override
+    public boolean hasEdge(int nodeA, int nodeB) {
+        if( ! connectLists.containsKey(nodeA) ) return false;
+        if( ! connectLists.containsKey(nodeB) ) return false;
+        for( Edge e : connectLists.get(nodeA) ) {
+            int nA = e.getNodeA();
+            int nB = e.getNodeB();
+            if( nA == nodeA && nB == nodeB || nA == nodeB && nB == nodeA ) return true;
+        }
+        for( Edge e : connectLists.get(nodeB) ) {
+            int nA = e.getNodeA();
+            int nB = e.getNodeB();
+            if( nA == nodeA && nB == nodeB || nA == nodeB && nB == nodeA ) return true;
+        }
+        return false;
+    }
 
     @Override
     public void addNode() {
@@ -20,8 +41,8 @@ public class ModifiableGraph extends BasicGraph implements GraphBuilder {
         if (!connectLists.containsKey(number)) {
             connectLists.put(number, new HashSet<>());
             nodeLabels.put(number, "" + number);
-            if (number > nextNodeNo) {
-                nextNodeNo = number;
+            if (number >= nextNodeNo) {
+                nextNodeNo = number+1;
             }
         }
     }

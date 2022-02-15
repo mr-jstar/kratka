@@ -72,6 +72,20 @@ public class GridGraph extends BasicGraph {
         updateEdgesWeights();
     }
 
+    public GridGraph(int nC, int nR) {
+        super();
+        numColumns = nC;
+        numRows = nR;
+        nextNodeNo = numColumns * numRows;
+        int nMax = numColumns * numRows;
+        for (int c = 0; c < numColumns; c++) {
+            for (int r = 0; r < numRows; r++) {
+                int nn = c * numRows + r;
+                connectLists.put(nn, new HashSet<>());
+            }
+        }
+    }
+
     /**
      * @return the node number given row and column
      */
@@ -153,10 +167,12 @@ public class GridGraph extends BasicGraph {
             numRows = Integer.parseInt(words[1]);
             nextNodeNo = numColumns * numRows;
             connectLists.clear();
+            //System.out.println(numColumns+" "+numRows);
             for (int i = 0; i < numColumns * numRows; i++) {
                 HashSet<Edge> edges = new HashSet<>();
                 words = br.readLine().trim().split("[\\s:]+");
-                for (int j = 0; j < words.length; j += 2) {
+                //System.out.println(i+":"+words.length);
+                for (int j = 0; j+1 < words.length; j += 2) {
                     Edge e = new Edge(i, Integer.parseInt(words[j]), Double.parseDouble(words[j + 1]));
                     edges.add(e);
                 }
@@ -164,7 +180,7 @@ public class GridGraph extends BasicGraph {
             }
             updateEdgesWeights();
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            throw new IOException("GridGraph can not read graph: " + e.getMessage());
+            throw new IOException("GridGraph can not read graph: " + e);
         }
     }
 

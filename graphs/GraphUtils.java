@@ -1,6 +1,7 @@
 package graphs;
 
 import java.util.Deque;
+import java.util.PriorityQueue;
 
 /**
  *
@@ -28,6 +29,36 @@ public class GraphUtils {
         }
 
         return true;
+    }
+
+    public static Graph prim( Graph g ) {
+        PriorityQueue<Edge> pq = new PriorityQueue<>();
+        ModifiableGraph mst = new ModifiableGraph();
+        mst.addNode(0);
+        for( Edge e : g.getConnectionsList(0))
+            pq.add(e);
+        while( ! pq.isEmpty() && mst.getNumNodes() < g.getNumNodes() ) {
+            //System.out.println( "Prim: |V.mst|="+mst.getNumNodes()+"  |PQ|="+pq.size());
+            Edge se = pq.poll();
+            int nA = se.getNodeA();
+            int nB = se.getNodeB();
+            if( mst.hasNode( nA ) && mst.hasNode( nB ) )
+                continue;
+            else {
+                if(mst.hasNode(nA)) {
+                    mst.addNode(nB);
+                    mst.addEdge(nA,nB,se.getWeight());
+                    for( Edge e: g.getConnectionsList(nB))
+                        pq.add(e);
+                } else {
+                    mst.addNode(nA);
+                    mst.addEdge(nB,nA,se.getWeight());
+                    for( Edge e: g.getConnectionsList(nA))
+                        pq.add(e);
+                }
+            }
+        }
+        return mst;
     }
 
     public static GraphPaths bfs(Graph g, int startNode) {

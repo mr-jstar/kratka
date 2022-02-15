@@ -1,5 +1,6 @@
 package kratka;
 
+import graphs.Graph;
 import graphs.GridGraph;
 import graphs.Edge;
 import graphs.GraphPaths;
@@ -48,8 +49,8 @@ public class Kratka extends Application {
     final static int MINNODESIZE = 10;
     final static int BASICNODESEP = 80;
     final static int BASICNODESIZE = 20;
-    final static int DEFAULTWIDTH = 1800;
-    final static int DEFAULTHEIGHT = 1600;
+    final static int DEFAULTWIDTH = 1000;
+    final static int DEFAULTHEIGHT = 800;
 
     private int leftSep = 10;
     private int topSep = 10;
@@ -75,6 +76,7 @@ public class Kratka extends Application {
     private int plotHeight = DEFAULTHEIGHT;
 
     private GraphPaths paths = null;
+    private Graph mst = null;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
 
@@ -250,7 +252,7 @@ public class Kratka extends Application {
         root.getChildren().add(btnBox);
 
         ObservableList<String> items = FXCollections.observableArrayList(
-                "BFS", "DFS Recursive", "DFS Iterative", "Dijkstra");
+                "BFS", "DFS Recursive", "DFS Iterative", "Dijkstra", "Prim");
         algorithms.getSelectionModel().select("BFS");
         algorithms.setItems(items);
         algorithms.setPrefWidth(200);
@@ -278,15 +280,25 @@ public class Kratka extends Application {
                             if (currentAlgorithm.equals("Dijkstra")) {
                                 System.out.println("Dijkstra");
                                 paths = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
+                                mst = null;
                             } else if (currentAlgorithm.equals("BFS")) {
                                 System.out.println("BFS");
                                 paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
+                                mst = null;
                             } else if (currentAlgorithm.equals("DFS Recursive")) {
                                 System.out.println("DFS Recursive");
                                 paths = GraphUtils.dfs(graph);
+                                mst = null;
                             } else if (currentAlgorithm.equals("DFS Iterative")) {
                                 System.out.println("Iterative DFS");
                                 paths = GraphUtils.dfs_iterative(graph);
+                                mst = null;
+                            } else if( currentAlgorithm.equals("Prim")) {
+                                System.out.println("MST by Prim");
+                                mst = GraphUtils.prim(graph);
+                                mst.save(new PrintWriter(new File("LastMST")));
+                                System.out.println("MST generated and saved");
+                                paths = null;
                             }
                             drawGraph(gc, canvas.getWidth(), canvas.getHeight());
                             if (paths != null) {
@@ -296,6 +308,9 @@ public class Kratka extends Application {
                                 colorNodes(gc, canvas.getWidth(), canvas.getHeight(), paths.d);
                                 ArrayList<Integer> longestPath = decodePathTo(paths.farthest);
                                 printPath(longestPath);
+                            }
+                            if( mst != null ) {
+                                drawMST(gc,canvas.getWidth(), canvas.getHeight());
                             }
                         }
                         if (e.getButton() == MouseButton.SECONDARY) {
@@ -410,7 +425,6 @@ public class Kratka extends Application {
         gc.setLineWidth(2);
         int rows = graph.getNumRows();
         int cols = graph.getNumColumns();
-        System.out.println("Node size: " + nodeSize + " sep: " + nodeSep);
         if (leftSep + cols * nodeSep + nodeSize / 2 > width) {
             nodeSep = (int) ((width - leftSep - nodeSize / 2) / cols);
         }
@@ -422,7 +436,7 @@ public class Kratka extends Application {
         }
         nodeSize = (int) (nodeSize * nodeSep / BASICNODESEP);
         nodeSize = nodeSize < MINNODESIZE ? MINNODESIZE : nodeSize;
-        System.out.println("Node size: " + nodeSize + " sep: " + nodeSep);
+        //System.out.println("Node size: " + nodeSize + " sep: " + nodeSep);
         int[][] rc = new int[graph.getNumNodes()][2];
         for (int n = 0; n < graph.getNumNodes(); n++) {
             rc[n][0] = n % rows;  // column
@@ -431,6 +445,53 @@ public class Kratka extends Application {
         }
         for (int n = 0; n < graph.getNumNodes(); n++) {
             Set<Edge> edges = graph.getConnectionsList(n);
+            for (Edge e : edges) {
+                Color c = edgeCM.getColorForValue(e.getWeight());
+                //System.out.println(e.getNodeA() + "--" + e.getNodeB() + " : " + e.getWeight() + "->" + c);
+                gc.setStroke(c);
+                int nA = e.getNodeA();
+                int nB = e.getNodeB();
+                gc.strokeLine(leftSep + nodeSize / 2 + rc[nA][1] * nodeSep, topSep + nodeSize / 2 + rc[nA][0] * nodeSep, leftSep + nodeSize / 2 + rc[nB][1] * nodeSep, topSep + nodeSize / 2 + rc[nB][0] * nodeSep);
+            }
+        }
+        for (int r = 0; r < graph.getNumRows(); r++) {
+            for (int c = 0; c < graph.getNumColumns(); c++) {
+                gc.fillOval(leftSep + c * nodeSep, topSep + r * nodeSep, nodeSize, nodeSize);
+            }
+        }
+    }
+
+    private void drawMST(GraphicsContext gc, double width, double height) {
+
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, width, height);
+        if (graph == null || mst == null || graph.getNumNodes() < 1) {
+            return;
+        }
+        gc.setFill(Color.GREY);
+        gc.setLineWidth(2);
+        int rows = graph.getNumRows();
+        int cols = graph.getNumColumns();
+        if (leftSep + cols * nodeSep + nodeSize / 2 > width) {
+            nodeSep = (int) ((width - leftSep - nodeSize / 2) / cols);
+        }
+        if (topSep + rows * nodeSep + nodeSize / 2 > height) {
+            nodeSep = (int) ((height - topSep - nodeSize / 2) / rows);
+        }
+        if (nodeSep < 1) {
+            return;
+        }
+        nodeSize = (int) (nodeSize * nodeSep / BASICNODESEP);
+        nodeSize = nodeSize < MINNODESIZE ? MINNODESIZE : nodeSize;
+        //System.out.println("Node size: " + nodeSize + " sep: " + nodeSep);
+        int[][] rc = new int[graph.getNumNodes()][2];
+        for (int n = 0; n < graph.getNumNodes(); n++) {
+            rc[n][0] = n % rows;  // column
+            rc[n][1] = n / rows;  // row
+            //System.out.println(n + "-> r=" + rc[n][0] + " c=" + rc[n][1]);
+        }
+        for (int n = 0; n < graph.getNumNodes(); n++) {
+            Set<Edge> edges = mst.getConnectionsList(n);
             for (Edge e : edges) {
                 Color c = edgeCM.getColorForValue(e.getWeight());
                 //System.out.println(e.getNodeA() + "--" + e.getNodeB() + " : " + e.getWeight() + "->" + c);
