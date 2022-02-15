@@ -39,5 +39,6 @@ public class DirGridGraph extends GridGraph {
                 }
             }
         }
+        updateEdgesWeights();
     }
 }

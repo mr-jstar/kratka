@@ -1,5 +1,7 @@
 package graphs;
 
+import java.util.Objects;
+
 /**
  *
  * @author jstar
@@ -56,6 +58,21 @@ public class Edge {
      */
     public void setWeight(double weight) {
         this.weight = weight;
+    }
+
+    @Override
+    public String toString() {
+        return nodeA + "-(" + weight + ")-" + nodeB;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Edge && ((Edge)o).nodeA == nodeA && ((Edge)o).nodeB == nodeB && ((Edge)o).weight == weight;
+    }
+
+    @Override
+    public int hashCode() {
+        return 7*nodeA + 17*nodeB + 251*Objects.hash(weight);
     }
 
 }

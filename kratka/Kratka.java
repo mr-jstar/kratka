@@ -48,8 +48,8 @@ public class Kratka extends Application {
     final static int MINNODESIZE = 10;
     final static int BASICNODESEP = 80;
     final static int BASICNODESIZE = 20;
-    final static int DEFAULTWIDTH = 1200;
-    final static int DEFAULTHEIGHT = 1000;
+    final static int DEFAULTWIDTH = 1800;
+    final static int DEFAULTHEIGHT = 1600;
 
     private int leftSep = 10;
     private int topSep = 10;
@@ -95,7 +95,7 @@ public class Kratka extends Application {
         TextField rTextField = new TextField();
         rTextField.setMaxWidth(100);
         rTextField.setAlignment(Pos.CENTER);
-        rTextField.setText(minWght + " - " + maxWght);
+        rTextField.setText(minWght + " : " + maxWght);
         HBox rhbox = new HBox(rTextField);
 
         Label elabel = new Label("Edges per node: ");
@@ -115,7 +115,7 @@ public class Kratka extends Application {
             public void handle(ActionEvent event) {
                 try {
                     String[] cr = sTextField.getText().split("\\s*x\\s*");
-                    String[] mx = rTextField.getText().split("\\s*-\\s*");
+                    String[] mx = rTextField.getText().split("\\s*:\\s*");
                     minWght = Double.parseDouble(mx[0]);
                     maxWght = Double.parseDouble(mx[1]);
                     edgeViewMinLabel.setText("" + minWght);
@@ -185,7 +185,7 @@ public class Kratka extends Application {
         });
 
         Button readbtn = new Button();
-        readbtn.setText("Read");
+        readbtn.setText("Load");
         readbtn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -194,16 +194,21 @@ public class Kratka extends Application {
                     graph = new GridGraph();
                 }
                 FileChooser fileChooser = new FileChooser();
-                //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
-                //fileChooser.getExtensionFilters().add(extFilter);
                 File file = fileChooser.showOpenDialog(primaryStage);
                 if (file != null) {
-                    System.out.println("Read graph");
+                    System.out.println("Load graph");
                     try {
                         Reader r = new FileReader(file);
                         graph.read(r);
                         r.close();
                         sTextField.setText(graph.getNumColumns() + " x " + graph.getNumRows());
+                        minWght = graph.getMinEdgeWeight();
+                        maxWght = graph.getMaxEdgeWeight();
+                        rTextField.setText(minWght + " : " + maxWght);
+                        edgeViewMinLabel.setText("" + minWght);
+                        edgeViewMaxLabel.setText("" + maxWght);
+                        edgeCM.setMin(minWght);
+                        edgeCM.setMax(maxWght);
                         drawGraph(gc, canvas.getWidth(), canvas.getHeight());
                     } catch (IOException e) {
                         System.out.println("NOT LOADED: " + e.getLocalizedMessage());
@@ -302,7 +307,7 @@ public class Kratka extends Application {
                         } else {
                             System.out.println("No paths defined!");
                         }
-                    } 
+                    }
                 }
 
             }

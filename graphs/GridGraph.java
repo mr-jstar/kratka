@@ -51,16 +51,25 @@ public class GridGraph extends BasicGraph {
                 double w12 = wMin + dW * rand.nextDouble();
                 double w23 = wMin + dW * rand.nextDouble();
                 double w30 = wMin + dW * rand.nextDouble();
-                l0.add(new Edge(n0, n1, w01));
-                l1.add(new Edge(n1, n0, w01));
-                l1.add(new Edge(n1, n2, w12));
-                l2.add(new Edge(n2, n1, w12));
-                l2.add(new Edge(n2, n3, w23));
-                l3.add(new Edge(n3, n2, w23));
-                l3.add(new Edge(n3, n0, w30));
-                l0.add(new Edge(n0, n3, w30));
+                if (rand.nextDouble() < avgEdgesPerNode / 4) {
+                    l0.add(new Edge(n0, n1, w01));
+                    l1.add(new Edge(n1, n0, w01));
+                }
+                if (rand.nextDouble() < avgEdgesPerNode / 4) {
+                    l1.add(new Edge(n1, n2, w12));
+                    l2.add(new Edge(n2, n1, w12));
+                }
+                if (rand.nextDouble() < avgEdgesPerNode / 4) {
+                    l2.add(new Edge(n2, n3, w23));
+                    l3.add(new Edge(n3, n2, w23));
+                }
+                if (rand.nextDouble() < avgEdgesPerNode / 4) {
+                    l3.add(new Edge(n3, n0, w30));
+                    l0.add(new Edge(n0, n3, w30));
+                }
             }
         }
+        updateEdgesWeights();
     }
 
     /**
@@ -142,15 +151,18 @@ public class GridGraph extends BasicGraph {
             String[] words = br.readLine().trim().split("\\s+");
             numColumns = Integer.parseInt(words[0]);
             numRows = Integer.parseInt(words[1]);
+            nextNodeNo = numColumns * numRows;
             connectLists.clear();
             for (int i = 0; i < numColumns * numRows; i++) {
                 HashSet<Edge> edges = new HashSet<>();
                 words = br.readLine().trim().split("[\\s:]+");
                 for (int j = 0; j < words.length; j += 2) {
-                    edges.add(new Edge(i, Integer.parseInt(words[j]), Double.parseDouble(words[j + 1])));
+                    Edge e = new Edge(i, Integer.parseInt(words[j]), Double.parseDouble(words[j + 1]));
+                    edges.add(e);
                 }
                 connectLists.put(i, edges);
             }
+            updateEdgesWeights();
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new IOException("GridGraph can not read graph: " + e.getMessage());
         }

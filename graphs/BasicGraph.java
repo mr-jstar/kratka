@@ -44,7 +44,9 @@ public class BasicGraph implements Graph {
      */
     @Override
     public double getMinEdgeWeight() {
-        updateEdgeWeight();
+        if (minEdgeWeight == 0.0 && maxEdgeWeight == 0.0) {
+            updateEdgesWeights();
+        }
         return minEdgeWeight;
     }
 
@@ -53,11 +55,13 @@ public class BasicGraph implements Graph {
      */
     @Override
     public double getMaxEdgeWeight() {
-        updateEdgeWeight();
+        if (minEdgeWeight == 0.0 && maxEdgeWeight == 0.0) {
+            updateEdgesWeights();
+        }
         return maxEdgeWeight;
     }
 
-    private void updateEdgeWeight() {
+    protected void updateEdgesWeights() {
         minEdgeWeight = Double.POSITIVE_INFINITY;
         maxEdgeWeight = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < nextNodeNo; i++) {
@@ -126,6 +130,7 @@ public class BasicGraph implements Graph {
                 }
                 connectLists.put(i, edges);
             }
+            updateEdgesWeights();
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new IOException("GridGraph can not read graph: " + e.getMessage());
         }
