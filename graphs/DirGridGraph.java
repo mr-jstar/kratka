@@ -1,8 +1,10 @@
 package graphs;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
@@ -110,20 +112,40 @@ public class DirGridGraph implements Graph {
     }
 
     @Override
-    public void save(String path) throws IOException {
-        PrintWriter p = new PrintWriter(new File(path));
-        p.println(numColumns + " " + numRows);
+    public void save(PrintWriter pw) throws IOException {
+        pw.println(numColumns + " " + numRows);
         for (int i = 0; i < numColumns * numRows; i++) {
             HashSet<Edge> edges = connectLists.get(i);
-            p.print("\t");
+            pw.print("\t");
             if (edges != null) {
                 for (Edge e : edges) {
-                    p.print(" " + e.getNodeB() + " :" + e.getWeight() + " ");
+                    pw.print(" " + e.getNodeB() + " :" + e.getWeight() + " ");
 
                 }
             }
-            p.println();
+            pw.println();
         }
-        p.close();
+        pw.close();
+    }
+
+    @Override
+    public void read(Reader r) throws IOException {
+        try {
+            BufferedReader br = new BufferedReader(r);
+            String[] words = br.readLine().split("\\s*");
+            numColumns = Integer.parseInt(words[0]);
+            numRows = Integer.parseInt(words[1]);
+            connectLists.clear();
+            for (int i = 0; i < numColumns * numRows; i++) {
+                HashSet<Edge> edges = new HashSet<>();
+                words = br.readLine().split("[\\s:]*");
+                for (int j = 0; j < words.length; j += 2) {
+                    edges.add(new Edge(i, Integer.parseInt(words[j]), Double.parseDouble(words[j + 1])));
+                }
+                connectLists.put(i, edges);
+            }
+        } catch (ArrayIndexOutOfBoundsException| NumberFormatException e) {
+            throw new IOException("GridGraph can not read graph: " + e.getMessage());
+        }
     }
 }

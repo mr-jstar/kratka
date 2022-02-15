@@ -1,15 +1,20 @@
 package kratka;
 
-import graphs.DirGridGraph;
+import graphs.GridGraph;
 import graphs.Edge;
 import graphs.GraphPaths;
 import graphs.GraphUtils;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -20,6 +25,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -51,7 +57,7 @@ public class Kratka extends Application {
     private int nodeSep = BASICNODESEP;
 
     private GraphicsContext gc;
-    private DirGridGraph graph;
+    private GridGraph graph;
     private Canvas canvas;
     private double minWght = 0;
     private double maxWght = 20;
@@ -71,6 +77,8 @@ public class Kratka extends Application {
     private GraphPaths paths = null;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
+
+    private ListView<String> algorithms = new ListView<String>();
 
     //private final Random random = new Random();
     @Override
@@ -115,7 +123,7 @@ public class Kratka extends Application {
                     edgeCM.setMin(minWght);
                     edgeCM.setMax(maxWght);
                     edgesPerNode = Double.parseDouble(eTextField.getText());
-                    graph = new DirGridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght, edgesPerNode);
+                    graph = new GridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght, edgesPerNode);
                     paths = null;
                     System.out.println("Draw graph " + graph.getNumColumns() + "x" + graph.getNumRows());
                     nodeSep = BASICNODESEP;
@@ -167,7 +175,7 @@ public class Kratka extends Application {
                     if (file != null) {
                         System.out.println("Save graph");
                         try {
-                            graph.save(file.getAbsolutePath());
+                            graph.save(new PrintWriter(file));
                         } catch (IOException e) {
                             System.out.println("NOT SAVED: " + e.getLocalizedMessage());
                         }
@@ -176,25 +184,66 @@ public class Kratka extends Application {
             }
         });
 
-        Button ebtn = new Button();
-        ebtn.setText("Exit");
-        ebtn.setOnAction(new EventHandler<ActionEvent>() {
+        Button readbtn = new Button();
+        readbtn.setText("Read");
+        readbtn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
+                if (graph == null) {
+                    graph = new GridGraph();
+                }
+                FileChooser fileChooser = new FileChooser();
+                //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+                //fileChooser.getExtensionFilters().add(extFilter);
+                File file = fileChooser.showOpenDialog(primaryStage);
+                if (file != null) {
+                    System.out.println("Read graph");
+                    try {
+                        Reader r = new FileReader(file);
+                        graph.read(r);
+                        r.close();
+                        sTextField.setText(graph.getNumColumns() + " x " + graph.getNumRows());
+                        drawGraph(gc, canvas.getWidth(), canvas.getHeight());
+                    } catch (IOException e) {
+                        System.out.println("NOT LOADED: " + e.getLocalizedMessage());
+                    }
+                }
+            }
+        }
+        );
+
+        Button ebtn = new Button();
+
+        ebtn.setText(
+                "Exit");
+        ebtn.setOnAction(
+                new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event
+            ) {
                 System.exit(0);
             }
-        });
+        }
+        );
         final Pane spacer0 = new Pane();
-        HBox.setHgrow(spacer0, Priority.ALWAYS);
-        spacer0.setMinSize(10, 1);
 
-        HBox btnBox = new HBox(30, phbox, abtn, rbtn, sbtn, dbtn, spacer0, ebtn);
-        btnBox.setPadding(new Insets(5, 5, 1, 5));
+        HBox.setHgrow(spacer0, Priority.ALWAYS);
+
+        spacer0.setMinSize(
+                10, 1);
+
+        HBox btnBox = new HBox(30, phbox, abtn, rbtn, readbtn, sbtn, dbtn, spacer0, ebtn);
+
+        btnBox.setPadding(
+                new Insets(5, 5, 1, 5));
         btnBox.setPrefWidth(plotWidth);
 
         FlowPane root = new FlowPane();
-        root.getChildren().add(btnBox);
+
+        root.getChildren()
+                .add(btnBox);
 
         canvas = new Canvas(plotWidth, plotHeight);
 
@@ -206,6 +255,8 @@ public class Kratka extends Application {
                 int r = (int) ((e.getY() - topSep) / nodeSep);
 
                 System.out.println("(" + e.getX() + "," + e.getY() + ") -> " + "(" + c + "," + r + ")");
+
+                System.out.println(algorithms.getSelectionModel().getSelectedItem());
 
                 if (graph != null && c >= 0 && c < graph.getNumColumns() && r >= 0 && r < graph.getNumRows()) {
                     System.out.println("Node # " + graph.nodeNum(r, c));
@@ -252,19 +303,28 @@ public class Kratka extends Application {
         canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
 
         gc = canvas.getGraphicsContext2D();
-        root.getChildren().add(canvas);
+
+        root.getChildren()
+                .add(canvas);
 
         edgeViewMinLabel = new Label("" + minWght);
         edgeViewMaxLabel = new Label("" + maxWght);
         Label esLabel = new Label("Edge color scale");
         final Pane spacer1 = new Pane();
+
         HBox.setHgrow(spacer1, Priority.ALWAYS);
-        spacer1.setMinSize(10, 1);
+
+        spacer1.setMinSize(
+                10, 1);
         final Pane spacer2 = new Pane();
+
         HBox.setHgrow(spacer2, Priority.ALWAYS);
+
         spacer2.setMinSize(10, 1);
         HBox lbox = new HBox(edgeViewMinLabel, spacer1, esLabel, spacer2, edgeViewMaxLabel);
+
         lbox.setPrefWidth(plotWidth);
+
         lbox.setStyle("-fx-background-color:#FAFAFA;");
         root.getChildren().add(lbox);
         root.getChildren().add(new ImageView(edgeCM.createColorScaleImage(plotWidth, 20, Orientation.HORIZONTAL)));
@@ -273,23 +333,40 @@ public class Kratka extends Application {
         nodeViewMaxLabel = new Label("1");
         Label nsLabel = new Label("Node color scale");
         final Pane spacer3 = new Pane();
+
         HBox.setHgrow(spacer3, Priority.ALWAYS);
+
         spacer1.setMinSize(10, 1);
         final Pane spacer4 = new Pane();
+
         HBox.setHgrow(spacer4, Priority.ALWAYS);
+
         spacer2.setMinSize(10, 1);
         HBox kbox = new HBox(nodeViewMinLabel, spacer3, nsLabel, spacer4, nodeViewMaxLabel);
+
         kbox.setPrefWidth(plotWidth);
+
         kbox.setStyle("-fx-background-color:#FAFAFA;");
         root.getChildren().add(kbox);
 
-        Scene scene = new Scene(root, plotWidth, plotHeight + 90);
+        ObservableList<String> items = FXCollections.observableArrayList(
+                "BFS", "DFS Recursive", "DFS Iterative", "Dijkstra");
+        algorithms.getSelectionModel().select("BFS");
+        algorithms.setItems(items);
+        algorithms.setPrefWidth(200);
+        algorithms.setPrefHeight(25);
+
+        HBox obox = new HBox(30, new Label("Operation:"), algorithms);
+        root.getChildren().add(obox);
+
+        Scene scene = new Scene(root, plotWidth, plotHeight + 110);
 
         scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode()));
         scene.setOnKeyReleased(e -> pressedKeys.remove(e.getCode()));
 
         primaryStage.setTitle("Kratka");
         primaryStage.setScene(scene);
+
         primaryStage.show();
     }
 

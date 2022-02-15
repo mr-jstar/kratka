@@ -1,6 +1,8 @@
 package graphs;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.Set;
 
 /**
@@ -11,10 +13,16 @@ public interface Graph {
 
     public int getNumNodes();
 
+    public double getMinEdgeWeight();
+
+    public double getMaxEdgeWeight();
+
     public String getNodeLabel(int n);
 
     public Set<Edge> getConnectionsList(int nodeNumber);
 
-    public void save(String path) throws IOException;
+    public void save(PrintWriter w) throws IOException;
+
+    public void read(Reader r) throws IOException;
 
 }

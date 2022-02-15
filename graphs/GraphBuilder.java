@@ -7,7 +7,7 @@ package graphs;
  */
 public interface GraphBuilder {
 
-    public void addNode(); // subsequent number
+    public void addNode(); // with subsequent number
 
     public void addNode(int number);
 
