@@ -79,11 +79,15 @@ public class GraphUtils {
         int[] c = new int[g.getNumNodes()];
         java.util.Arrays.fill(c, WHITE);
 
-        for (int n = 0; n < g.getNumNodes(); n++) {
-            if (c[n] == WHITE) {
-                d[n] = 0;
-                dfs_visit(g, n, d, f, p, c, 0);
+        try {
+            for (int n = 0; n < g.getNumNodes(); n++) {
+                if (c[n] == WHITE) {
+                    d[n] = 0;
+                    dfs_visit(g, n, d, f, p, c, 0);
+                }
             }
+        } catch (StackOverflowError e) {
+            throw new IllegalArgumentException("Recursive DFS: graph is to big/complicated");
         }
 
         return new GraphPaths(p, d, f);
@@ -122,8 +126,9 @@ public class GraphUtils {
         java.util.Deque<Integer> stack = new java.util.ArrayDeque<>();
         for (int n = 0; n < g.getNumNodes(); n++) {
             if (c[n] == WHITE) {
+                time = 0;
                 c[n] = GRAY;
-                d[n] = ++time;
+                d[n] = time++;
                 stack.push(n);
                 while (!stack.isEmpty()) {
                     int currentNode = stack.pop();
@@ -133,7 +138,7 @@ public class GraphUtils {
                         if (c[neighbour] == WHITE) {
                             c[neighbour] = GRAY;
                             p[neighbour] = currentNode;
-                            d[neighbour] = ++time;
+                            d[neighbour] = time++;
                             stack.push(neighbour);
                             isFinished = false;
                             break;
@@ -141,7 +146,7 @@ public class GraphUtils {
                     }
                     if (isFinished) {
                         c[currentNode] = BLACK;
-                        f[currentNode] = ++time;
+                        f[currentNode] = time++;
                         if (p[currentNode] != -1) {
                             stack.push(p[currentNode]);
                         }

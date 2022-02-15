@@ -271,46 +271,50 @@ public class Kratka extends Application {
                 System.out.println("(" + e.getX() + "," + e.getY() + ") -> " + "(" + c + "," + r + ")");
 
                 String currentAlgorithm = algorithms.getSelectionModel().getSelectedItem();
-
-                if (graph != null && c >= 0 && c < graph.getNumColumns() && r >= 0 && r < graph.getNumRows()) {
-                    System.out.println("Node # " + graph.nodeNum(r, c));
-                    if (e.getButton() == MouseButton.PRIMARY) {
-                        if (currentAlgorithm.equals("Dijkstra")) {
-                            System.out.println("Dijkstra");
-                            paths = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
-                        } else if (currentAlgorithm.equals("BFS")) {
-                            System.out.println("BFS");
-                            paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
-                        } else if (currentAlgorithm.equals("DFS Recursive")) {
-                            System.out.println("DFS Recursive");
-                            paths = GraphUtils.dfs(graph);
-                        } else if (currentAlgorithm.equals("DFS Iterative")) {
-                            System.out.println("Iterative DFS");
-                            paths = GraphUtils.dfs_iterative(graph);
+                try {
+                    if (graph != null && c >= 0 && c < graph.getNumColumns() && r >= 0 && r < graph.getNumRows()) {
+                        System.out.println("Node # " + graph.nodeNum(r, c));
+                        if (e.getButton() == MouseButton.PRIMARY) {
+                            if (currentAlgorithm.equals("Dijkstra")) {
+                                System.out.println("Dijkstra");
+                                paths = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
+                            } else if (currentAlgorithm.equals("BFS")) {
+                                System.out.println("BFS");
+                                paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
+                            } else if (currentAlgorithm.equals("DFS Recursive")) {
+                                System.out.println("DFS Recursive");
+                                paths = GraphUtils.dfs(graph);
+                            } else if (currentAlgorithm.equals("DFS Iterative")) {
+                                System.out.println("Iterative DFS");
+                                paths = GraphUtils.dfs_iterative(graph);
+                            }
+                            drawGraph(gc, canvas.getWidth(), canvas.getHeight());
+                            if (paths != null) {
+                                nodeCM = new ColorMap(paths.dMin, paths.dMax);
+                                nodeViewMinLabel.setText("" + paths.dMin);
+                                nodeViewMaxLabel.setText("" + paths.dMax);
+                                colorNodes(gc, canvas.getWidth(), canvas.getHeight(), paths.d);
+                                ArrayList<Integer> longestPath = decodePathTo(paths.farthest);
+                                printPath(longestPath);
+                            }
                         }
-                        drawGraph(gc, canvas.getWidth(), canvas.getHeight());
-                        if (paths != null) {
-                            nodeCM = new ColorMap(paths.dMin, paths.dMax);
-                            nodeViewMinLabel.setText("" + paths.dMin);
-                            nodeViewMaxLabel.setText("" + paths.dMax);
-                            colorNodes(gc, canvas.getWidth(), canvas.getHeight(), paths.d);
-                            ArrayList<Integer> longestPath = decodePathTo(paths.farthest);
-                            printPath(longestPath);
+                        if (e.getButton() == MouseButton.SECONDARY) {
+                            if (paths != null) {
+                                System.out.println("Path to");
+                                ArrayList<Integer> path = decodePathTo(graph.nodeNum(r, c));
+                                printPath(path);
+                                drawPath(gc, canvas.getWidth(), canvas.getHeight(), path);
+                            } else {
+                                System.out.println("No paths defined!");
+                            }
                         }
                     }
-                    if (e.getButton() == MouseButton.SECONDARY) {
-                        if (paths != null) {
-                            System.out.println("Path to");
-                            ArrayList<Integer> path = decodePathTo(graph.nodeNum(r, c));
-                            printPath(path);
-                            drawPath(gc, canvas.getWidth(), canvas.getHeight(), path);
-                        } else {
-                            System.out.println("No paths defined!");
-                        }
-                    }
+                } catch (Exception ex) {
+                    System.out.println(ex.getLocalizedMessage());
                 }
 
             }
+
         };
 
         canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
