@@ -72,7 +72,7 @@ public class GridGraph extends BasicGraph {
         updateEdgesWeights();
     }
 
-    public GridGraph(int nC, int nR) {
+    public GridGraph(int nC, int nR, Graph toCopy ) {
         super();
         numColumns = nC;
         numRows = nR;
@@ -81,7 +81,7 @@ public class GridGraph extends BasicGraph {
         for (int c = 0; c < numColumns; c++) {
             for (int r = 0; r < numRows; r++) {
                 int nn = c * numRows + r;
-                connectLists.put(nn, new HashSet<>());
+                connectLists.put(nn, new HashSet<>(toCopy.getConnectionsList(nn)));
             }
         }
     }

@@ -87,7 +87,8 @@ public class BasicGraph implements Graph {
      */
     @Override
     public HashSet<Edge> getConnectionsList(int n) {
-        return connectLists == null ? null : connectLists.get(n);
+        HashSet<Edge> s = connectLists == null ? null : connectLists.get(n);
+        return s == null ? new HashSet<>() : s;
     }
 
     @Override

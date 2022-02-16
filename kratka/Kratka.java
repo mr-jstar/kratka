@@ -14,25 +14,27 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -46,11 +48,14 @@ import javafx.stage.FileChooser;
  */
 public class Kratka extends Application {
 
+    final static String[] algorithms = {"BFS", "DFS Recursive", "DFS Iterative", "Dijkstra", "Prim"};
+
+    final static int DEFAULTWIDTH = 1600;
+    final static int DEFAULTHEIGHT = DEFAULTWIDTH - 200;
+
     final static int MINNODESIZE = 10;
     final static int BASICNODESEP = 80;
     final static int BASICNODESIZE = 20;
-    final static int DEFAULTWIDTH = 1000;
-    final static int DEFAULTHEIGHT = 800;
 
     private int leftSep = 10;
     private int topSep = 10;
@@ -80,7 +85,7 @@ public class Kratka extends Application {
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
 
-    private ListView<String> algorithms = new ListView<String>();
+    private ToggleGroup algGroup = new ToggleGroup();
 
     //private final Random random = new Random();
     @Override
@@ -238,27 +243,30 @@ public class Kratka extends Application {
 
         HBox.setHgrow(spacer0, Priority.ALWAYS);
 
-        spacer0.setMinSize(
-                10, 1);
+        spacer0.setMinSize(10, 1);
 
         HBox btnBox = new HBox(30, phbox, abtn, rbtn, readbtn, sbtn, dbtn, spacer0, ebtn);
 
-        btnBox.setPadding(
-                new Insets(5, 5, 1, 5));
+        btnBox.setPadding(new Insets(5, 5, 5, 5));
         btnBox.setPrefWidth(plotWidth);
 
         FlowPane root = new FlowPane();
 
         root.getChildren().add(btnBox);
 
-        ObservableList<String> items = FXCollections.observableArrayList(
-                "BFS", "DFS Recursive", "DFS Iterative", "Dijkstra", "Prim");
-        algorithms.getSelectionModel().select("BFS");
-        algorithms.setItems(items);
-        algorithms.setPrefWidth(200);
-        algorithms.setPrefHeight(25);
+        HBox buttBox = new HBox();
+        buttBox.setSpacing(10);
 
-        HBox obox = new HBox(30, new Label("Operation:"), algorithms);
+        for (String s : algorithms) {
+            RadioButton aB = new RadioButton(s);
+            aB.setToggleGroup(algGroup);
+            aB.setSelected(true);
+            buttBox.getChildren().add(aB);
+        }
+        root.getChildren().add(buttBox);
+
+        HBox obox = new HBox(30, new Label("Operation:"), buttBox);
+        obox.setPadding(new Insets(5, 5, 5, 5));
         root.getChildren().add(obox);
 
         canvas = new Canvas(plotWidth, plotHeight);
@@ -272,32 +280,36 @@ public class Kratka extends Application {
 
                 System.out.println("(" + e.getX() + "," + e.getY() + ") -> " + "(" + c + "," + r + ")");
 
-                String currentAlgorithm = algorithms.getSelectionModel().getSelectedItem();
+                //String selectedtAlgorithm = algorithms.getSelectionModel().getSelectedItem();
+                String selectedtAlgorithm = ((RadioButton) algGroup.getSelectedToggle()).getText();
+                if (selectedtAlgorithm == null) {
+                    selectedtAlgorithm = "";
+                }
                 try {
                     if (graph != null && c >= 0 && c < graph.getNumColumns() && r >= 0 && r < graph.getNumRows()) {
                         System.out.println("Node # " + graph.nodeNum(r, c));
                         if (e.getButton() == MouseButton.PRIMARY) {
-                            if (currentAlgorithm.equals("Dijkstra")) {
+                            if (selectedtAlgorithm.equals("Dijkstra")) {
                                 System.out.println("Dijkstra");
                                 paths = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
                                 mst = null;
-                            } else if (currentAlgorithm.equals("BFS")) {
+                            } else if (selectedtAlgorithm.equals("BFS")) {
                                 System.out.println("BFS");
                                 paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
                                 mst = null;
-                            } else if (currentAlgorithm.equals("DFS Recursive")) {
+                            } else if (selectedtAlgorithm.equals("DFS Recursive")) {
                                 System.out.println("DFS Recursive");
                                 paths = GraphUtils.dfs(graph);
                                 mst = null;
-                            } else if (currentAlgorithm.equals("DFS Iterative")) {
+                            } else if (selectedtAlgorithm.equals("DFS Iterative")) {
                                 System.out.println("Iterative DFS");
                                 paths = GraphUtils.dfs_iterative(graph);
                                 mst = null;
-                            } else if( currentAlgorithm.equals("Prim")) {
+                            } else if (selectedtAlgorithm.equals("Prim")) {
                                 System.out.println("MST by Prim");
                                 mst = GraphUtils.prim(graph);
-                                mst.save(new PrintWriter(new File("LastMST")));
-                                System.out.println("MST generated and saved");
+                                (new GridGraph(graph.getNumColumns(),graph.getNumRows(),mst)).save(new PrintWriter(new File("LastMST")));
+                                System.out.println("MST generated and saved as GridGraph to file \"LastMST\"");
                                 paths = null;
                             }
                             drawGraph(gc, canvas.getWidth(), canvas.getHeight());
@@ -309,8 +321,8 @@ public class Kratka extends Application {
                                 ArrayList<Integer> longestPath = decodePathTo(paths.farthest);
                                 printPath(longestPath);
                             }
-                            if( mst != null ) {
-                                drawMST(gc,canvas.getWidth(), canvas.getHeight());
+                            if (mst != null) {
+                                drawMST(gc, canvas.getWidth(), canvas.getHeight());
                             }
                         }
                         if (e.getButton() == MouseButton.SECONDARY) {
@@ -381,7 +393,7 @@ public class Kratka extends Application {
         kbox.setStyle("-fx-background-color:#FAFAFA;");
         root.getChildren().add(kbox);
 
-        Scene scene = new Scene(root, plotWidth, plotHeight + 110);
+        Scene scene = new Scene(root, plotWidth, plotHeight + 120);
 
         scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode()));
         scene.setOnKeyReleased(e -> pressedKeys.remove(e.getCode()));

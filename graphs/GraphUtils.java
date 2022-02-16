@@ -1,6 +1,6 @@
 package graphs;
 
-import java.util.Deque;
+import java.util.Arrays;
 import java.util.PriorityQueue;
 
 /**
@@ -31,30 +31,33 @@ public class GraphUtils {
         return true;
     }
 
-    public static Graph prim( Graph g ) {
+    public static Graph prim(Graph g) {
         PriorityQueue<Edge> pq = new PriorityQueue<>();
         ModifiableGraph mst = new ModifiableGraph();
         mst.addNode(0);
-        for( Edge e : g.getConnectionsList(0))
+        for (Edge e : g.getConnectionsList(0)) {
             pq.add(e);
-        while( ! pq.isEmpty() && mst.getNumNodes() < g.getNumNodes() ) {
+        }
+        while (!pq.isEmpty() && mst.getNumNodes() < g.getNumNodes()) {
             //System.out.println( "Prim: |V.mst|="+mst.getNumNodes()+"  |PQ|="+pq.size());
             Edge se = pq.poll();
             int nA = se.getNodeA();
             int nB = se.getNodeB();
-            if( mst.hasNode( nA ) && mst.hasNode( nB ) )
+            if (mst.hasNode(nA) && mst.hasNode(nB)) {
                 continue;
-            else {
-                if(mst.hasNode(nA)) {
+            } else {
+                if (mst.hasNode(nA)) {
                     mst.addNode(nB);
-                    mst.addEdge(nA,nB,se.getWeight());
-                    for( Edge e: g.getConnectionsList(nB))
+                    mst.addEdge(nA, nB, se.getWeight());
+                    for (Edge e : g.getConnectionsList(nB)) {
                         pq.add(e);
+                    }
                 } else {
                     mst.addNode(nA);
-                    mst.addEdge(nB,nA,se.getWeight());
-                    for( Edge e: g.getConnectionsList(nA))
+                    mst.addEdge(nB, nA, se.getWeight());
+                    for (Edge e : g.getConnectionsList(nA)) {
                         pq.add(e);
+                    }
                 }
             }
         }
@@ -190,16 +193,21 @@ public class GraphUtils {
 
     }
 
+// Self made priority queue for Dijkstra
     private static class HeapPQ {
 
-        private int[] h;
-        private double[] d;
-        private int n;
+        private int[] h;    // heap
+        private int n;      // actual length of heap
+        private double[] d; // distances of all nodes to the source
+        private int[] pos;  // positions of all nodes to the source
+                            // pos is used to find the position of node x on the heap at O(1)
 
         HeapPQ(double[] d) {
-            this.d = d;
+            this.d = d;              // copy of the table used in Dijkstra algorithm
+            pos = new int[d.length];
+            Arrays.fill(pos, -1);    // none of the nodes is on the heap
             h = new int[d.length];
-            n = 0;
+            n = 0;                   // initially the heap is empty
         }
 
         boolean isEmpty() {
@@ -213,6 +221,8 @@ public class GraphUtils {
                     int tmp = h[p];
                     h[p] = h[c];
                     h[c] = tmp;
+                    pos[h[p]] = p;
+                    pos[h[c]] = c;
                     return;
                 }
                 c = p;
@@ -222,6 +232,7 @@ public class GraphUtils {
         void add(int i, double dst) {
             d[i] = dst;
             h[n++] = i;
+            pos[i] = n - 1;
             heapUp(n - 1);
         }
 
@@ -231,6 +242,8 @@ public class GraphUtils {
             }
             int ret = h[0];
             h[0] = h[--n];
+            pos[ret] = -1;
+            pos[h[0]] = 0;
             int p = 0;  // heap down
             int c = 2 * p + 1;
             while (c < n) {
@@ -243,6 +256,8 @@ public class GraphUtils {
                 int tmp = h[p];
                 h[p] = h[c];
                 h[c] = tmp;
+                pos[h[p]] = p;
+                pos[h[c]] = c;
                 p = c;
                 c = 2 * p + 1;
             }
@@ -251,18 +266,12 @@ public class GraphUtils {
 
         void update(int x, double dst) {
             d[x] = dst;
-            int i;
-            for (i = 0; i < n; i++) {
-                if (h[i] == x) {
-                    break;
-                }
-            }
-            if (i == n) {
-                h[i] = x;  //  there was no x in heap yet
-                n++;
+            if (pos[x] == -1) { //  there was no x in heap yet
+                h[n++] = x;  
+                pos[x] = n-1;
             }
             //System.out.println(); print();
-            heapUp(i);
+            heapUp(pos[x]);
             //print();
         }
 
