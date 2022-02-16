@@ -48,7 +48,7 @@ import javafx.stage.FileChooser;
  */
 public class Kratka extends Application {
 
-    final static String[] algorithms = {"BFS", "DFS Recursive", "DFS Iterative", "Dijkstra", "Prim"};
+    final static String[] algorithms = {"BFS", "DFS Recursive", "DFS Iterative", "Dijkstra", "Kruskal", "Prim"};
 
     final static int DEFAULTWIDTH = 1600;
     final static int DEFAULTHEIGHT = DEFAULTWIDTH - 200;
@@ -305,6 +305,12 @@ public class Kratka extends Application {
                                 System.out.println("Iterative DFS");
                                 paths = GraphUtils.dfs_iterative(graph);
                                 mst = null;
+                            } else if (selectedtAlgorithm.equals("Kruskal")) {
+                                System.out.println("MST by Kruskal");
+                                mst = GraphUtils.kruskal(graph);
+                                (new GridGraph(graph.getNumColumns(),graph.getNumRows(),mst)).save(new PrintWriter(new File("LastMST")));
+                                System.out.println("MST generated and saved as GridGraph to file \"LastMST\"");
+                                paths = null;
                             } else if (selectedtAlgorithm.equals("Prim")) {
                                 System.out.println("MST by Prim");
                                 mst = GraphUtils.prim(graph);

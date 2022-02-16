@@ -15,17 +15,25 @@ public class ModifiableGraph extends BasicGraph implements GraphBuilder {
 
     @Override
     public boolean hasEdge(int nodeA, int nodeB) {
-        if( ! connectLists.containsKey(nodeA) ) return false;
-        if( ! connectLists.containsKey(nodeB) ) return false;
-        for( Edge e : connectLists.get(nodeA) ) {
-            int nA = e.getNodeA();
-            int nB = e.getNodeB();
-            if( nA == nodeA && nB == nodeB || nA == nodeB && nB == nodeA ) return true;
+        if (!connectLists.containsKey(nodeA)) {
+            return false;
         }
-        for( Edge e : connectLists.get(nodeB) ) {
+        if (!connectLists.containsKey(nodeB)) {
+            return false;
+        }
+        for (Edge e : connectLists.get(nodeA)) {
             int nA = e.getNodeA();
             int nB = e.getNodeB();
-            if( nA == nodeA && nB == nodeB || nA == nodeB && nB == nodeA ) return true;
+            if (nA == nodeA && nB == nodeB || nA == nodeB && nB == nodeA) {
+                return true;
+            }
+        }
+        for (Edge e : connectLists.get(nodeB)) {
+            int nA = e.getNodeA();
+            int nB = e.getNodeB();
+            if (nA == nodeA && nB == nodeB || nA == nodeB && nB == nodeA) {
+                return true;
+            }
         }
         return false;
     }
@@ -42,7 +50,7 @@ public class ModifiableGraph extends BasicGraph implements GraphBuilder {
             connectLists.put(number, new HashSet<>());
             nodeLabels.put(number, "" + number);
             if (number >= nextNodeNo) {
-                nextNodeNo = number+1;
+                nextNodeNo = number + 1;
             }
         }
     }
@@ -57,6 +65,15 @@ public class ModifiableGraph extends BasicGraph implements GraphBuilder {
         addNode(first);
         addNode(second);
         connectLists.get(first).add(new Edge(first, second, weight));
+        connectLists.get(second).add(new Edge(second, first, weight));
+    }
+
+    @Override
+    public void addEdge(Edge e) {
+        addNode(e.getNodeA());
+        addNode(e.getNodeB());
+        connectLists.get(e.getNodeA()).add(e);
+        connectLists.get(e.getNodeB()).add(new Edge(e.getNodeB(), e.getNodeA(), e.getWeight()));
     }
 
     @Override

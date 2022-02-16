@@ -1,6 +1,7 @@
 package graphs;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 
 /**
@@ -8,13 +9,13 @@ import java.util.PriorityQueue;
  * @author jstar
  */
 public class GraphUtils {
-
+    
     static final int WHITE = 0;
     static final int GRAY = 1;
     static final int BLACK = 2;
-
+    
     public static String lastError = null;
-
+    
     public static boolean valid(Graph g, int startNode) {
         if (g == null || g.getNumNodes() < 1 || startNode < 0 || startNode >= g.getNumNodes()) {
             return false;
@@ -27,10 +28,10 @@ public class GraphUtils {
                 }
             }
         }
-
+        
         return true;
     }
-
+    
     public static Graph prim(Graph g) {
         PriorityQueue<Edge> pq = new PriorityQueue<>();
         ModifiableGraph mst = new ModifiableGraph();
@@ -63,7 +64,89 @@ public class GraphUtils {
         }
         return mst;
     }
+    
+    static class Forest { // set of grah-trees, very simple (not effective) implementation 
 
+        private ModifiableGraph[] f;
+        int n;
+        
+        public Forest(int size) {
+            f = new ModifiableGraph[size];
+            n = 0;
+        }
+        
+        public void add(ModifiableGraph g) {
+            f[n++] = g;
+        }
+        
+        public int getTreeWithNode(int node) {
+System.out.print( "Forest search for graph with " + node + " -> ");
+            for (int i = 0; i < n; i++) {
+                if (f[i].hasNode(node)) {
+System.out.println( i );
+                    return i;
+                }
+            }
+            return -1;
+        }
+        
+        public void removeTree(int i) {
+            f[i] = f[--n];
+        }
+        
+        public int size() {
+            return n;
+        }
+        
+        public ModifiableGraph get(int i) {
+            return f[i];
+        }
+    }
+    
+    public static Graph kruskal(Graph g) {
+        PriorityQueue<Edge> pq = new PriorityQueue<>();
+        Forest forest = new Forest(g.getNumNodes());
+        for (int i = 0; i < g.getNumNodes(); i++) {
+            //System.out.println("Init Kruskal: |forest|=" + forest.size() + "  |PQ|=" + pq.size());
+            ModifiableGraph t = new ModifiableGraph();
+            t.addNode(i);
+System.out.println( t.hasNode(i) );
+            forest.add(t);
+System.out.println( forest.getTreeWithNode(i) );
+            for (Edge e : g.getConnectionsList(i)) {
+                pq.add(e);
+            }
+        }
+        while (!pq.isEmpty() && forest.size() > 1) {
+            System.out.println("Main loop Kruskal: |forest|=" + forest.size() + "  |PQ|=" + pq.size());
+            Edge se = pq.poll();
+
+            int iA = forest.getTreeWithNode(se.getNodeA());
+            int iB = forest.getTreeWithNode(se.getNodeB());
+
+            System.out.println("Edge " + se + "  iA=" + iA + "  iB=" + iB);
+            if (iA != iB) {
+                // add tB to tA
+                ModifiableGraph tA = forest.get(iA);
+                ModifiableGraph tB = forest.get(iB);
+                for (int i = 0; i < g.getNumNodes(); i++) {
+                    if (tB.hasNode(i)) {
+                        tA.addNode(i);
+                        for (Edge e : tB.getConnectionsList(i)) {
+                            tA.addEdge(e);
+                        }
+                    }
+                }
+                // remove tA and tB from the forest
+                forest.removeTree(iA);
+                forest.removeTree(iB);
+                // add new tA to the forest
+                forest.add(tA);
+            }
+        }
+        return forest.get(0);
+    }
+    
     public static GraphPaths bfs(Graph g, int startNode) {
         if (g == null || g.getNumNodes() < 1 || startNode < 0 || startNode >= g.getNumNodes()) {
             return null;
@@ -75,7 +158,7 @@ public class GraphUtils {
 
         int[] c = new int[g.getNumNodes()];
         java.util.Arrays.fill(c, WHITE);
-
+        
         c[startNode] = GRAY;
         d[startNode] = 0;   // made by Arrays.fill, repeated here for clarity
         p[startNode] = -1;  // made by Arrays.fill, repeated here for clarity
@@ -95,10 +178,10 @@ public class GraphUtils {
             }
             c[currentNode] = BLACK;
         }
-
+        
         return new GraphPaths(d, p);
     }
-
+    
     public static GraphPaths dfs(Graph g) {
         if (g == null || g.getNumNodes() < 1) {
             return null;
@@ -112,7 +195,7 @@ public class GraphUtils {
 
         int[] c = new int[g.getNumNodes()];
         java.util.Arrays.fill(c, WHITE);
-
+        
         try {
             for (int n = 0; n < g.getNumNodes(); n++) {
                 if (c[n] == WHITE) {
@@ -123,12 +206,12 @@ public class GraphUtils {
         } catch (StackOverflowError e) {
             throw new IllegalArgumentException("Recursive DFS: graph is to big/complicated");
         }
-
+        
         return new GraphPaths(p, d, f);
     }
-
+    
     private static void dfs_visit(Graph g, int currentNode, int[] d, int[] f, int[] p, int[] c, int time) {
-
+        
         c[currentNode] = GRAY;
         d[currentNode] = time;
         for (Edge e : g.getConnectionsList(currentNode)) {
@@ -141,7 +224,7 @@ public class GraphUtils {
         c[currentNode] = BLACK;
         f[currentNode] = time + 1;
     }
-
+    
     public static GraphPaths dfs_iterative(Graph g) {
         if (g == null || g.getNumNodes() < 1) {
             return null;
@@ -155,7 +238,7 @@ public class GraphUtils {
 
         int[] c = new int[g.getNumNodes()];
         java.util.Arrays.fill(c, WHITE);
-
+        
         int time = 0;
         java.util.Deque<Integer> stack = new java.util.ArrayDeque<>();
         for (int n = 0; n < g.getNumNodes(); n++) {
@@ -188,19 +271,19 @@ public class GraphUtils {
                 }
             }
         }
-
+        
         return new GraphPaths(p, d, f);
-
+        
     }
 
 // Self made priority queue for Dijkstra
     private static class HeapPQ {
-
+        
         private int[] h;    // heap
         private int n;      // actual length of heap
         private double[] d; // distances of all nodes to the source
         private int[] pos;  // positions of all nodes to the source
-                            // pos is used to find the position of node x on the heap at O(1)
+        // pos is used to find the position of node x on the heap at O(1)
 
         HeapPQ(double[] d) {
             this.d = d;              // copy of the table used in Dijkstra algorithm
@@ -209,11 +292,11 @@ public class GraphUtils {
             h = new int[d.length];
             n = 0;                   // initially the heap is empty
         }
-
+        
         boolean isEmpty() {
             return n == 0;
         }
-
+        
         void heapUp(int c) {
             while (c > 0) {
                 int p = (c - 1) / 2;
@@ -228,14 +311,14 @@ public class GraphUtils {
                 c = p;
             }
         }
-
+        
         void add(int i, double dst) {
             d[i] = dst;
             h[n++] = i;
             pos[i] = n - 1;
             heapUp(n - 1);
         }
-
+        
         int poll() {
             if (n == 0) {
                 throw new IllegalStateException("GraphUtils::dijkstra: trying to pop from empty priority queue!");
@@ -263,18 +346,18 @@ public class GraphUtils {
             }
             return ret;
         }
-
+        
         void update(int x, double dst) {
             d[x] = dst;
             if (pos[x] == -1) { //  there was no x in heap yet
-                h[n++] = x;  
-                pos[x] = n-1;
+                h[n++] = x;
+                pos[x] = n - 1;
             }
             //System.out.println(); print();
             heapUp(pos[x]);
             //print();
         }
-
+        
         void print() {
             System.out.print("[");
             for (int i = 0; i < n; i++) {
@@ -283,7 +366,7 @@ public class GraphUtils {
             System.out.println(" ]");
         }
     }
-
+    
     public static GraphPaths dijkstra(Graph g, int startNode) {
         if (g == null || g.getNumNodes() < 1 || startNode < 0 || startNode >= g.getNumNodes()) {
             return null;
@@ -293,7 +376,7 @@ public class GraphUtils {
         double[] d = new double[g.getNumNodes()];
         java.util.Arrays.fill(d, Double.POSITIVE_INFINITY);
         java.util.Arrays.fill(p, -1);
-
+        
         p[startNode] = -1;  // made by Arrays.fill, repeated here for clarity
         HeapPQ queue = new HeapPQ(d);
         queue.add(startNode, 0.0);
@@ -313,7 +396,7 @@ public class GraphUtils {
                 //System.out.println();
             }
         }
-
+        
         return new GraphPaths(d, p);
     }
 }
