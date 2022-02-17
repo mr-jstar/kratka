@@ -50,7 +50,7 @@ public class Kratka extends Application {
 
     final static String[] algorithms = {"BFS", "DFS Recursive", "DFS Iterative", "Dijkstra", "Kruskal", "Prim"};
 
-    final static int DEFAULTWIDTH = 1600;
+    final static int DEFAULTWIDTH = 1000;
     final static int DEFAULTHEIGHT = DEFAULTWIDTH - 200;
 
     final static int MINNODESIZE = 10;
@@ -130,7 +130,10 @@ public class Kratka extends Application {
                     edgeCM.setMin(minWght);
                     edgeCM.setMax(maxWght);
                     edgesPerNode = Double.parseDouble(eTextField.getText());
+                    long start = System.nanoTime();
                     graph = new GridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght, edgesPerNode);
+                    long finish = System.nanoTime();
+                    System.out.println( (finish-start)/1000+" microseconds");
                     paths = null;
                     System.out.println("Draw graph " + graph.getNumColumns() + "x" + graph.getNumRows());
                     nodeSep = BASICNODESEP;
@@ -291,29 +294,47 @@ public class Kratka extends Application {
                         if (e.getButton() == MouseButton.PRIMARY) {
                             if (selectedtAlgorithm.equals("Dijkstra")) {
                                 System.out.println("Dijkstra");
+                                long start = System.nanoTime();
                                 paths = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
+                                long finish = System.nanoTime();
+                                System.out.println( (finish-start)/1000+" microseconds");
                                 mst = null;
                             } else if (selectedtAlgorithm.equals("BFS")) {
                                 System.out.println("BFS");
+                                long start = System.nanoTime();
                                 paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
+                                long finish = System.nanoTime();
+                                System.out.println( (finish-start)/1000+" microseconds");
                                 mst = null;
                             } else if (selectedtAlgorithm.equals("DFS Recursive")) {
                                 System.out.println("DFS Recursive");
+                                long start = System.nanoTime();
                                 paths = GraphUtils.dfs(graph);
+                                long finish = System.nanoTime();
+                                System.out.println( (finish-start)/1000+" microseconds");
                                 mst = null;
                             } else if (selectedtAlgorithm.equals("DFS Iterative")) {
                                 System.out.println("Iterative DFS");
+                                long start = System.nanoTime();
                                 paths = GraphUtils.dfs_iterative(graph);
+                                long finish = System.nanoTime();
+                                System.out.println( (finish-start)/1000+" microseconds");
                                 mst = null;
                             } else if (selectedtAlgorithm.equals("Kruskal")) {
                                 System.out.println("MST by Kruskal");
+                                long start = System.nanoTime();
                                 mst = GraphUtils.kruskal(graph);
+                                long finish = System.nanoTime();
+                                System.out.println( (finish-start)/1000+" microseconds");
                                 (new GridGraph(graph.getNumColumns(),graph.getNumRows(),mst)).save(new PrintWriter(new File("LastMST")));
                                 System.out.println("MST generated and saved as GridGraph to file \"LastMST\"");
                                 paths = null;
                             } else if (selectedtAlgorithm.equals("Prim")) {
                                 System.out.println("MST by Prim");
+                                long start = System.nanoTime();
                                 mst = GraphUtils.prim(graph);
+                                long finish = System.nanoTime();
+                                System.out.println( (finish-start)/1000+" microseconds");
                                 (new GridGraph(graph.getNumColumns(),graph.getNumRows(),mst)).save(new PrintWriter(new File("LastMST")));
                                 System.out.println("MST generated and saved as GridGraph to file \"LastMST\"");
                                 paths = null;

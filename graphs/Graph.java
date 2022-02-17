@@ -13,6 +13,8 @@ public interface Graph {
 
     public int getNumNodes();
 
+    public Set<Integer> getNodeNumbers();
+
     public double getMinEdgeWeight();
 
     public double getMaxEdgeWeight();

@@ -37,35 +37,29 @@ public class GridGraph extends BasicGraph {
                 connectLists.put(nn, new HashSet<>());
             }
         }
-        for (int c = 1; c < numColumns; c++) {
+        for (int c = 0; c < numColumns; c++) {
             for (int r = 1; r < numRows; r++) {
                 int n2 = c * numRows + r;
                 int n1 = n2 - 1;
-                int n0 = n1 - numRows;
-                int n3 = n0 + 1;
-                HashSet<Edge> l0 = connectLists.get(n0);
                 HashSet<Edge> l1 = connectLists.get(n1);
                 HashSet<Edge> l2 = connectLists.get(n2);
-                HashSet<Edge> l3 = connectLists.get(n3);
-                double w01 = wMin + dW * rand.nextDouble();
                 double w12 = wMin + dW * rand.nextDouble();
-                double w23 = wMin + dW * rand.nextDouble();
-                double w30 = wMin + dW * rand.nextDouble();
-                if (rand.nextDouble() < avgEdgesPerNode / 4) {
-                    l0.add(new Edge(n0, n1, w01));
-                    l1.add(new Edge(n1, n0, w01));
-                }
                 if (rand.nextDouble() < avgEdgesPerNode / 4) {
                     l1.add(new Edge(n1, n2, w12));
                     l2.add(new Edge(n2, n1, w12));
                 }
+            }
+        }
+        for (int c = 1; c < numColumns; c++) {
+            for (int r = 0; r < numRows; r++) {
+                int n2 = c * numRows + r;
+                int n1 = n2 - numRows;
+                HashSet<Edge> l1 = connectLists.get(n1);
+                HashSet<Edge> l2 = connectLists.get(n2);
+                double w12 = wMin + dW * rand.nextDouble();
                 if (rand.nextDouble() < avgEdgesPerNode / 4) {
-                    l2.add(new Edge(n2, n3, w23));
-                    l3.add(new Edge(n3, n2, w23));
-                }
-                if (rand.nextDouble() < avgEdgesPerNode / 4) {
-                    l3.add(new Edge(n3, n0, w30));
-                    l0.add(new Edge(n0, n3, w30));
+                    l1.add(new Edge(n1, n2, w12));
+                    l2.add(new Edge(n2, n1, w12));
                 }
             }
         }

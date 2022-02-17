@@ -20,6 +20,8 @@ public interface GraphBuilder {
 
     public void addEdge(Edge e);
 
+    public void addGraph(Graph g);
+
     public void setNodeLabel(int n, String label);
 
     public Graph getGraph();

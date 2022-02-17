@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -25,6 +26,14 @@ public class BasicGraph implements Graph {
     @Override
     public int getNumNodes() {
         return connectLists == null ? 0 : connectLists.size();
+    }
+
+    /**
+     * @return the number of Nodes
+     */
+    @Override
+    public Set<Integer> getNodeNumbers() {
+        return connectLists.keySet();
     }
 
     /**
@@ -135,5 +144,16 @@ public class BasicGraph implements Graph {
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new IOException("GridGraph can not read graph: " + e.getMessage());
         }
+    }
+
+    @Override
+    public String toString() {
+        String s = new String(connectLists.size()+"");
+        for( Integer i : connectLists.keySet()) {
+            s += "\n\t" + i + ":";
+            for( Edge e : connectLists.get(i) )
+                s += " " +e;
+        }
+        return s;
     }
 }

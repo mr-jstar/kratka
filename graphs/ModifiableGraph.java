@@ -70,10 +70,18 @@ public class ModifiableGraph extends BasicGraph implements GraphBuilder {
 
     @Override
     public void addEdge(Edge e) {
-        addNode(e.getNodeA());
-        addNode(e.getNodeB());
-        connectLists.get(e.getNodeA()).add(e);
-        connectLists.get(e.getNodeB()).add(new Edge(e.getNodeB(), e.getNodeA(), e.getWeight()));
+        addEdge(e.getNodeA(),e.getNodeB(),e.getWeight());
+    }
+
+    @Override
+    public void addGraph( Graph g ) {
+        for( Integer i : g.getNodeNumbers()) {
+            addNode(i);
+        }
+        for( Integer i : g.getNodeNumbers()) {
+            for( Edge e : g.getConnectionsList(i))
+                addEdge(e);
+        }
     }
 
     @Override

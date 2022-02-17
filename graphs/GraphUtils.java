@@ -80,10 +80,10 @@ public class GraphUtils {
         }
         
         public int getTreeWithNode(int node) {
-System.out.print( "Forest search for graph with " + node + " -> ");
+            //System.out.print( "Forest search for graph with " + node + " -> ");
             for (int i = 0; i < n; i++) {
                 if (f[i].hasNode(node)) {
-System.out.println( i );
+                    //System.out.println( i );
                     return i;
                 }
             }
@@ -107,43 +107,30 @@ System.out.println( i );
         PriorityQueue<Edge> pq = new PriorityQueue<>();
         Forest forest = new Forest(g.getNumNodes());
         for (int i = 0; i < g.getNumNodes(); i++) {
-            //System.out.println("Init Kruskal: |forest|=" + forest.size() + "  |PQ|=" + pq.size());
             ModifiableGraph t = new ModifiableGraph();
             t.addNode(i);
-System.out.println( t.hasNode(i) );
             forest.add(t);
-System.out.println( forest.getTreeWithNode(i) );
             for (Edge e : g.getConnectionsList(i)) {
                 pq.add(e);
             }
         }
+
         while (!pq.isEmpty() && forest.size() > 1) {
-            System.out.println("Main loop Kruskal: |forest|=" + forest.size() + "  |PQ|=" + pq.size());
             Edge se = pq.poll();
 
             int iA = forest.getTreeWithNode(se.getNodeA());
             int iB = forest.getTreeWithNode(se.getNodeB());
 
-            System.out.println("Edge " + se + "  iA=" + iA + "  iB=" + iB);
+            //System.out.println("Edge " + se + "  iA=" + iA + "  iB=" + iB);
             if (iA != iB) {
                 // add tB to tA
                 ModifiableGraph tA = forest.get(iA);
-                ModifiableGraph tB = forest.get(iB);
-                for (int i = 0; i < g.getNumNodes(); i++) {
-                    if (tB.hasNode(i)) {
-                        tA.addNode(i);
-                        for (Edge e : tB.getConnectionsList(i)) {
-                            tA.addEdge(e);
-                        }
-                    }
-                }
-                // remove tA and tB from the forest
-                forest.removeTree(iA);
+                tA.addGraph(forest.get(iB));
+                tA.addEdge(se);
                 forest.removeTree(iB);
-                // add new tA to the forest
-                forest.add(tA);
             }
         }
+
         return forest.get(0);
     }
     
