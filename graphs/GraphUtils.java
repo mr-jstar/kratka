@@ -1,21 +1,23 @@
 package graphs;
 
+import java.util.Set;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.PriorityQueue;
+
+import java.text.DecimalFormat;
 
 /**
  *
  * @author jstar
  */
 public class GraphUtils {
-    
+
     static final int WHITE = 0;
     static final int GRAY = 1;
     static final int BLACK = 2;
-    
+
     public static String lastError = null;
-    
+
     public static boolean valid(Graph g, int startNode) {
         if (g == null || g.getNumNodes() < 1 || startNode < 0 || startNode >= g.getNumNodes()) {
             return false;
@@ -28,10 +30,10 @@ public class GraphUtils {
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     public static Graph prim(Graph g) {
         PriorityQueue<Edge> pq = new PriorityQueue<>();
         ModifiableGraph mst = new ModifiableGraph();
@@ -64,21 +66,21 @@ public class GraphUtils {
         }
         return mst;
     }
-    
+
     static class Forest { // set of grah-trees, very simple (not effective) implementation 
 
         private ModifiableGraph[] f;
         int n;
-        
+
         public Forest(int size) {
             f = new ModifiableGraph[size];
             n = 0;
         }
-        
+
         public void add(ModifiableGraph g) {
             f[n++] = g;
         }
-        
+
         public int getTreeWithNode(int node) {
             //System.out.print( "Forest search for graph with " + node + " -> ");
             for (int i = 0; i < n; i++) {
@@ -89,20 +91,20 @@ public class GraphUtils {
             }
             return -1;
         }
-        
+
         public void removeTree(int i) {
             f[i] = f[--n];
         }
-        
+
         public int size() {
             return n;
         }
-        
+
         public ModifiableGraph get(int i) {
             return f[i];
         }
     }
-    
+
     public static Graph kruskal(Graph g) {
         PriorityQueue<Edge> pq = new PriorityQueue<>();
         Forest forest = new Forest(g.getNumNodes());
@@ -133,8 +135,8 @@ public class GraphUtils {
 
         return forest.get(0);
     }
-    
-    public static GraphPaths bfs(Graph g, int startNode) {
+
+    public static SingleSourceGraphPaths bfs(Graph g, int startNode) {
         if (g == null || g.getNumNodes() < 1 || startNode < 0 || startNode >= g.getNumNodes()) {
             return null;
         }
@@ -145,7 +147,7 @@ public class GraphUtils {
 
         int[] c = new int[g.getNumNodes()];
         java.util.Arrays.fill(c, WHITE);
-        
+
         c[startNode] = GRAY;
         d[startNode] = 0;   // made by Arrays.fill, repeated here for clarity
         p[startNode] = -1;  // made by Arrays.fill, repeated here for clarity
@@ -165,11 +167,11 @@ public class GraphUtils {
             }
             c[currentNode] = BLACK;
         }
-        
-        return new GraphPaths(d, p);
+
+        return new SingleSourceGraphPaths(d, p);
     }
-    
-    public static GraphPaths dfs(Graph g) {
+
+    public static SingleSourceGraphPaths dfs(Graph g) {
         if (g == null || g.getNumNodes() < 1) {
             return null;
         }
@@ -182,7 +184,7 @@ public class GraphUtils {
 
         int[] c = new int[g.getNumNodes()];
         java.util.Arrays.fill(c, WHITE);
-        
+
         try {
             for (int n = 0; n < g.getNumNodes(); n++) {
                 if (c[n] == WHITE) {
@@ -193,12 +195,12 @@ public class GraphUtils {
         } catch (StackOverflowError e) {
             throw new IllegalArgumentException("Recursive DFS: graph is to big/complicated");
         }
-        
-        return new GraphPaths(p, d, f);
+
+        return new SingleSourceGraphPaths(p, d, f);
     }
-    
+
     private static void dfs_visit(Graph g, int currentNode, int[] d, int[] f, int[] p, int[] c, int time) {
-        
+
         c[currentNode] = GRAY;
         d[currentNode] = time;
         for (Edge e : g.getConnectionsList(currentNode)) {
@@ -211,8 +213,8 @@ public class GraphUtils {
         c[currentNode] = BLACK;
         f[currentNode] = time + 1;
     }
-    
-    public static GraphPaths dfs_iterative(Graph g) {
+
+    public static SingleSourceGraphPaths dfs_iterative(Graph g) {
         if (g == null || g.getNumNodes() < 1) {
             return null;
         }
@@ -225,7 +227,7 @@ public class GraphUtils {
 
         int[] c = new int[g.getNumNodes()];
         java.util.Arrays.fill(c, WHITE);
-        
+
         int time = 0;
         java.util.Deque<Integer> stack = new java.util.ArrayDeque<>();
         for (int n = 0; n < g.getNumNodes(); n++) {
@@ -258,14 +260,14 @@ public class GraphUtils {
                 }
             }
         }
-        
-        return new GraphPaths(p, d, f);
-        
+
+        return new SingleSourceGraphPaths(p, d, f);
+
     }
 
 // Self made priority queue for Dijkstra
     private static class HeapPQ {
-        
+
         private int[] h;    // heap
         private int n;      // actual length of heap
         private double[] d; // distances of all nodes to the source
@@ -279,11 +281,11 @@ public class GraphUtils {
             h = new int[d.length];
             n = 0;                   // initially the heap is empty
         }
-        
+
         boolean isEmpty() {
             return n == 0;
         }
-        
+
         void heapUp(int c) {
             while (c > 0) {
                 int p = (c - 1) / 2;
@@ -298,14 +300,14 @@ public class GraphUtils {
                 c = p;
             }
         }
-        
+
         void add(int i, double dst) {
             d[i] = dst;
             h[n++] = i;
             pos[i] = n - 1;
             heapUp(n - 1);
         }
-        
+
         int poll() {
             if (n == 0) {
                 throw new IllegalStateException("GraphUtils::dijkstra: trying to pop from empty priority queue!");
@@ -333,7 +335,7 @@ public class GraphUtils {
             }
             return ret;
         }
-        
+
         void update(int x, double dst) {
             d[x] = dst;
             if (pos[x] == -1) { //  there was no x in heap yet
@@ -344,7 +346,7 @@ public class GraphUtils {
             heapUp(pos[x]);
             //print();
         }
-        
+
         void print() {
             System.out.print("[");
             for (int i = 0; i < n; i++) {
@@ -353,8 +355,8 @@ public class GraphUtils {
             System.out.println(" ]");
         }
     }
-    
-    public static GraphPaths dijkstra(Graph g, int startNode) {
+
+    public static SingleSourceGraphPaths dijkstra(Graph g, int startNode) {
         if (g == null || g.getNumNodes() < 1 || startNode < 0 || startNode >= g.getNumNodes()) {
             return null;
         }
@@ -363,7 +365,7 @@ public class GraphUtils {
         double[] d = new double[g.getNumNodes()];
         java.util.Arrays.fill(d, Double.POSITIVE_INFINITY);
         java.util.Arrays.fill(p, -1);
-        
+
         p[startNode] = -1;  // made by Arrays.fill, repeated here for clarity
         HeapPQ queue = new HeapPQ(d);
         queue.add(startNode, 0.0);
@@ -383,7 +385,99 @@ public class GraphUtils {
                 //System.out.println();
             }
         }
-        
-        return new GraphPaths(d, p);
+
+        return new SingleSourceGraphPaths(d, p);
+    }
+
+    public static SingleSourceGraphPaths bellmanFord(Graph g, int startNode) {
+        if (g == null || g.getNumNodes() < 1 || startNode < 0 || startNode >= g.getNumNodes()) {
+            return null;
+        }
+        //System.out.println("Dijkstra, source=" + startNode);
+        int nn = g.getNumNodes();
+        int[] p = new int[nn];
+        double[] d = new double[nn];
+        java.util.Arrays.fill(d, Double.POSITIVE_INFINITY);
+        java.util.Arrays.fill(p, -1);
+
+        p[startNode] = -1;  // made by Arrays.fill, repeated here for clarity
+        d[startNode] = 0;
+        Set<Edge> allEdges = g.getAllEdges();
+        for (int i = 0; i < nn; i++) {
+            for (Edge e : allEdges) {
+                int nA = e.getNodeA();
+                int nB = e.getNodeB();
+                double w = e.getWeight();
+                if (d[nA] > d[nB] + w) {
+                    d[nA] = d[nB] + w;
+                    p[nA] = nB;
+                }
+            }
+        }
+
+        return new SingleSourceGraphPaths(d, p);
+    }
+
+    private static final DecimalFormat df = new DecimalFormat("0.00");
+
+    private static void printArray(double[][] d) {
+        int nn = d.length;
+        for (int i = 0; i < nn; i++) {
+            for (int j = 0; j < nn; j++) {
+                System.out.print(" " + df.format(d[i][j]));
+            }
+            System.out.println();
+        }
+    }
+
+    private static void printArray(int[][] d) {
+        int nn = d.length;
+        for (int i = 0; i < nn; i++) {
+            for (int j = 0; j < nn; j++) {
+                System.out.print(" " + d[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+    public static AllGraphPaths floydWarshall(Graph g) {
+        if (g == null || g.getNumNodes() < 1) {
+            return null;
+        }
+
+        int nn = g.getNumNodes();
+        int[][] p = new int[nn][nn];
+        double[][] d = new double[nn][nn];
+        for (int i = 0; i < nn; i++) {
+            java.util.Arrays.fill(d[i], Double.POSITIVE_INFINITY);
+            java.util.Arrays.fill(p[i], -1);
+        }
+        for (int i = 0; i < nn; i++) {
+            d[i][i] = 0;
+        }
+        Set<Edge> allEdges = g.getAllEdges();
+        for (Edge e : allEdges) {
+            int nA = e.getNodeA();
+            int nB = e.getNodeB();
+            double w = e.getWeight();
+            d[nA][nB] = d[nB][nA] = w;
+            p[nA][nB] = nA;
+            p[nB][nA] = nB;
+        }
+
+        for (int m = 0; m < nn; m++) {
+            for (int src = 0; src < nn; src++) {
+                for (int dst = 0; dst < nn; dst++) {
+                    if (d[src][dst] > d[src][m] + d[m][dst]) {
+                        d[src][dst] = d[src][m] + d[m][dst];
+                        p[src][dst] = p[m][dst];
+                    }
+                }
+            }
+        }
+
+printArray( p );
+
+        return new AllGraphPaths(d, p);
     }
 }

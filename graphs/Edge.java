@@ -3,10 +3,11 @@ package graphs;
 import java.util.Objects;
 
 /**
+ *  Undirected edge in a weighted graph (see equals method)
  *
  * @author jstar
  */
-public class Edge implements Comparable<Edge> {
+public class Edge implements Comparable<Edge> {   
 
     private int nodeA;
     private int nodeB;
@@ -67,16 +68,18 @@ public class Edge implements Comparable<Edge> {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Edge && ((Edge)o).nodeA == nodeA && ((Edge)o).nodeB == nodeB && ((Edge)o).weight == weight;
+        return o instanceof Edge
+                && (((Edge) o).nodeA == nodeA && ((Edge) o).nodeB == nodeB || ((Edge) o).nodeA == nodeB && ((Edge) o).nodeB == nodeA )
+                && ((Edge) o).weight == weight;
     }
 
     @Override
     public int hashCode() {
-        return 7*nodeA + 17*nodeB + 251*Objects.hash(weight);
+        return 7 * nodeA + 17 * nodeB + 251 * Objects.hash(weight);
     }
 
     @Override
-    public int compareTo( Edge o ) {
+    public int compareTo(Edge o) {
         return o.weight > weight ? -1 : (o.weight == weight ? 0 : 1);
     }
 

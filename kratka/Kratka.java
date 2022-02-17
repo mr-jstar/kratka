@@ -1,9 +1,10 @@
 package kratka;
 
+import graphs.AllGraphPaths;
 import graphs.Graph;
 import graphs.GridGraph;
 import graphs.Edge;
-import graphs.GraphPaths;
+import graphs.SingleSourceGraphPaths;
 import graphs.GraphUtils;
 import java.io.File;
 import java.io.FileReader;
@@ -19,14 +20,12 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
@@ -34,7 +33,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -48,9 +46,9 @@ import javafx.stage.FileChooser;
  */
 public class Kratka extends Application {
 
-    final static String[] algorithms = {"BFS", "DFS Recursive", "DFS Iterative", "Dijkstra", "Kruskal", "Prim"};
+    final static String[] algorithms = {"BFS", "DFS Recursive", "DFS Iterative", "Dijkstra", "Bellman-Ford", "Floyd-Warshall", "Kruskal", "Prim"};
 
-    final static int DEFAULTWIDTH = 1000;
+    final static int DEFAULTWIDTH = 1800;
     final static int DEFAULTHEIGHT = DEFAULTWIDTH - 200;
 
     final static int MINNODESIZE = 10;
@@ -80,7 +78,8 @@ public class Kratka extends Application {
     private int plotWidth = DEFAULTWIDTH;
     private int plotHeight = DEFAULTHEIGHT;
 
-    private GraphPaths paths = null;
+    private SingleSourceGraphPaths pathsSS = null;
+    private AllGraphPaths pathsAll = null;
     private Graph mst = null;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
@@ -133,8 +132,8 @@ public class Kratka extends Application {
                     long start = System.nanoTime();
                     graph = new GridGraph(Integer.parseInt(cr[0]), Integer.parseInt(cr[1]), minWght, maxWght, edgesPerNode);
                     long finish = System.nanoTime();
-                    System.out.println( (finish-start)/1000+" microseconds");
-                    paths = null;
+                    System.out.println((finish - start) / 1000 + " microseconds");
+                    pathsSS = null;
                     System.out.println("Draw graph " + graph.getNumColumns() + "x" + graph.getNumRows());
                     nodeSep = BASICNODESEP;
                     drawGraph(gc, canvas.getWidth(), canvas.getHeight());
@@ -152,8 +151,8 @@ public class Kratka extends Application {
             public void handle(ActionEvent event) {
                 System.out.println("Redraw graph");
                 drawGraph(gc, canvas.getWidth(), canvas.getHeight());
-                if (paths != null) {
-                    colorNodes(gc, canvas.getWidth(), canvas.getHeight(), paths.d);
+                if (pathsSS != null) {
+                    colorNodes(gc, canvas.getWidth(), canvas.getHeight());
                 }
             }
         });
@@ -166,7 +165,7 @@ public class Kratka extends Application {
             public void handle(ActionEvent event) {
                 System.out.println("Delete graph");
                 graph = null;
-                paths = null;
+                pathsSS = null;
                 drawGraph(gc, canvas.getWidth(), canvas.getHeight());
             }
         });
@@ -295,67 +294,95 @@ public class Kratka extends Application {
                             if (selectedtAlgorithm.equals("Dijkstra")) {
                                 System.out.println("Dijkstra");
                                 long start = System.nanoTime();
-                                paths = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
+                                pathsSS = GraphUtils.dijkstra(graph, graph.nodeNum(r, c));
                                 long finish = System.nanoTime();
-                                System.out.println( (finish-start)/1000+" microseconds");
+                                System.out.println((finish - start) / 1000 + " microseconds");
+                                mst = null;
+                                pathsAll = null;
+                            } else if (selectedtAlgorithm.equals("Bellman-Ford")) {
+                                System.out.println("Bellman-Ford");
+                                long start = System.nanoTime();
+                                pathsSS = GraphUtils.bellmanFord(graph, graph.nodeNum(r, c));
+                                long finish = System.nanoTime();
+                                System.out.println((finish - start) / 1000 + " microseconds");
+                                mst = null;
+                                pathsAll = null;
+                            } else if (selectedtAlgorithm.equals("Floyd-Warshall")) {
+                                System.out.println("Floyd-Warshall");
+                                long start = System.nanoTime();
+                                pathsAll = GraphUtils.floydWarshall(graph);
+                                long finish = System.nanoTime();
+                                System.out.println((finish - start) / 1000 + " microseconds");
+                                pathsSS = pathsAll.getSSPaths(graph.nodeNum(r, c));
                                 mst = null;
                             } else if (selectedtAlgorithm.equals("BFS")) {
                                 System.out.println("BFS");
                                 long start = System.nanoTime();
-                                paths = GraphUtils.bfs(graph, graph.nodeNum(r, c));
+                                pathsSS = GraphUtils.bfs(graph, graph.nodeNum(r, c));
                                 long finish = System.nanoTime();
-                                System.out.println( (finish-start)/1000+" microseconds");
+                                System.out.println((finish - start) / 1000 + " microseconds");
                                 mst = null;
+                                pathsAll = null;
                             } else if (selectedtAlgorithm.equals("DFS Recursive")) {
                                 System.out.println("DFS Recursive");
                                 long start = System.nanoTime();
-                                paths = GraphUtils.dfs(graph);
+                                pathsSS = GraphUtils.dfs(graph);
                                 long finish = System.nanoTime();
-                                System.out.println( (finish-start)/1000+" microseconds");
+                                System.out.println((finish - start) / 1000 + " microseconds");
                                 mst = null;
+                                pathsAll = null;
                             } else if (selectedtAlgorithm.equals("DFS Iterative")) {
                                 System.out.println("Iterative DFS");
                                 long start = System.nanoTime();
-                                paths = GraphUtils.dfs_iterative(graph);
+                                pathsSS = GraphUtils.dfs_iterative(graph);
                                 long finish = System.nanoTime();
-                                System.out.println( (finish-start)/1000+" microseconds");
+                                System.out.println((finish - start) / 1000 + " microseconds");
                                 mst = null;
+                                pathsAll = null;
                             } else if (selectedtAlgorithm.equals("Kruskal")) {
                                 System.out.println("MST by Kruskal");
                                 long start = System.nanoTime();
                                 mst = GraphUtils.kruskal(graph);
                                 long finish = System.nanoTime();
-                                System.out.println( (finish-start)/1000+" microseconds");
-                                (new GridGraph(graph.getNumColumns(),graph.getNumRows(),mst)).save(new PrintWriter(new File("LastMST")));
+                                System.out.println((finish - start) / 1000 + " microseconds");
+                                (new GridGraph(graph.getNumColumns(), graph.getNumRows(), mst)).save(new PrintWriter(new File("LastMST")));
                                 System.out.println("MST generated and saved as GridGraph to file \"LastMST\"");
-                                paths = null;
+                                pathsSS = null;
+                                pathsAll = null;
                             } else if (selectedtAlgorithm.equals("Prim")) {
                                 System.out.println("MST by Prim");
                                 long start = System.nanoTime();
                                 mst = GraphUtils.prim(graph);
                                 long finish = System.nanoTime();
-                                System.out.println( (finish-start)/1000+" microseconds");
-                                (new GridGraph(graph.getNumColumns(),graph.getNumRows(),mst)).save(new PrintWriter(new File("LastMST")));
+                                System.out.println((finish - start) / 1000 + " microseconds");
+                                (new GridGraph(graph.getNumColumns(), graph.getNumRows(), mst)).save(new PrintWriter(new File("LastMST")));
                                 System.out.println("MST generated and saved as GridGraph to file \"LastMST\"");
-                                paths = null;
+                                pathsSS = null;
+                                pathsAll = null;
                             }
                             drawGraph(gc, canvas.getWidth(), canvas.getHeight());
-                            if (paths != null) {
-                                nodeCM = new ColorMap(paths.dMin, paths.dMax);
-                                nodeViewMinLabel.setText("" + paths.dMin);
-                                nodeViewMaxLabel.setText("" + paths.dMax);
-                                colorNodes(gc, canvas.getWidth(), canvas.getHeight(), paths.d);
-                                ArrayList<Integer> longestPath = decodePathTo(paths.farthest);
+                            if (pathsSS != null) {
+                                colorNodes(gc, canvas.getWidth(), canvas.getHeight());
+                                ArrayList<Integer> longestPath = decodePathTo(pathsSS.farthest);
                                 printPath(longestPath);
                             }
                             if (mst != null) {
                                 drawMST(gc, canvas.getWidth(), canvas.getHeight());
                             }
                         }
+                        if (e.getButton() == MouseButton.MIDDLE && pathsAll != null) {
+                            pathsSS = pathsAll.getSSPaths(graph.nodeNum(r, c));
+                            for (int i = 0; i < pathsSS.p.length; i++) {
+                                System.out.print(" " + pathsSS.p[i]);
+                            }
+                            System.out.println();
+                            colorNodes(gc, canvas.getWidth(), canvas.getHeight());
+                        }
                         if (e.getButton() == MouseButton.SECONDARY) {
-                            if (paths != null) {
-                                System.out.println("Path to");
-                                ArrayList<Integer> path = decodePathTo(graph.nodeNum(r, c));
+                            if (pathsSS != null) {
+                                int dn = graph.nodeNum(r, c);
+                                System.out.println("Path to node " + dn);
+                                ArrayList<Integer> path = decodePathTo(dn);
                                 printPath(path);
                                 drawPath(gc, canvas.getWidth(), canvas.getHeight(), path);
                             } else {
@@ -434,7 +461,7 @@ public class Kratka extends Application {
     private ArrayList<Integer> decodePathTo(int farthest) {
         ArrayList<Integer> path = new ArrayList<>();
         //restore from last to source
-        for (; farthest >= 0; farthest = paths.p[farthest]) {
+        for (; farthest >= 0; farthest = pathsSS.p[farthest]) {
             path.add(farthest);
         }
         //and reverse
@@ -450,7 +477,7 @@ public class Kratka extends Application {
         for (int i = 0; i < path.size(); i++) {
             System.out.print(" " + path.get(i));
         }
-        System.out.println();
+        System.out.println("\t length = " + pathsSS.d[path.get(path.size() - 1)]);
     }
 
     private void drawGraph(GraphicsContext gc, double width, double height) {
@@ -547,10 +574,14 @@ public class Kratka extends Application {
         }
     }
 
-    private void colorNodes(GraphicsContext gc, double width, double height, double[] colors) {
+    private void colorNodes(GraphicsContext gc, double width, double height) {
         if (graph == null || graph.getNumNodes() < 1) {
             return;
         }
+        double[] colors = pathsSS.d;
+        nodeCM = new ColorMap(pathsSS.dMin, pathsSS.dMax);
+        nodeViewMinLabel.setText("" + pathsSS.dMin);
+        nodeViewMaxLabel.setText("" + pathsSS.dMax);
         for (int r = 0; r < graph.getNumRows(); r++) {
             for (int c = 0; c < graph.getNumColumns(); c++) {
                 gc.setFill(nodeCM.getColorForValue(colors[graph.nodeNum(r, c)]));

@@ -1,4 +1,4 @@
-package heatmap;
+package testcode;
 
 import javafx.application.Application;
 import javafx.geometry.Orientation;
