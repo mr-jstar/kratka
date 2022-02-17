@@ -80,7 +80,7 @@ public class Edge implements Comparable<Edge> {
 
     @Override
     public int compareTo(Edge o) {
-        return o.weight > weight ? -1 : (o.weight == weight ? 0 : 1);
+        return o.getWeight() > weight ? -1 : (o.getWeight() == weight ? 0 : 1);
     }
 
 }

@@ -4,7 +4,7 @@ package graphs;
  *
  * @author jstar
  */
-public interface GraphBuilder {
+public interface GraphBuilder  {
 
     public void addNode(); // with subsequent number
 
@@ -18,7 +18,7 @@ public interface GraphBuilder {
 
     public void addEdge(int first, int second, double weight);
 
-    public void addEdge(Edge e);
+    public void addEdge(Edge  e);
 
     public void addGraph(Graph g);
 

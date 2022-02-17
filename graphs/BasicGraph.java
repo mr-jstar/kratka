@@ -4,11 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  *
@@ -43,7 +41,7 @@ public class BasicGraph implements Graph {
      */
     @Override
     public Set<Edge> getAllEdges() {
-        Set<Edge> all = new HashSet<Edge>();
+        Set<Edge> all = new HashSet<>();
         for (Integer n : connectLists.keySet()) {
             all.addAll(connectLists.get(n));
         }

@@ -6,7 +6,7 @@ import java.util.HashSet;
  *
  * @author jstar
  */
-public class ModifiableGraph extends BasicGraph implements GraphBuilder {
+public class ModifiableGraph extends BasicGraph implements GraphBuilder  {
 
     @Override
     public boolean hasNode(int number) {
@@ -74,7 +74,7 @@ public class ModifiableGraph extends BasicGraph implements GraphBuilder {
     }
 
     @Override
-    public void addGraph( Graph g ) {
+    public void addGraph( Graph  g ) {
         for( Integer i : g.getNodeNumbers()) {
             addNode(i);
         }

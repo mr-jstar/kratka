@@ -489,6 +489,7 @@ public class Kratka extends Application {
         }
         gc.setFill(Color.GREY);
         gc.setLineWidth(2);
+        nodeSep = BASICNODESEP;
         int rows = graph.getNumRows();
         int cols = graph.getNumColumns();
         if (leftSep + cols * nodeSep + nodeSize / 2 > width) {

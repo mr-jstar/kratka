@@ -1,10 +1,14 @@
 package graphs;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Set;
 import java.util.Arrays;
 import java.util.PriorityQueue;
 
 import java.text.DecimalFormat;
+import java.util.HashSet;
 
 /**
  *
@@ -17,6 +21,27 @@ public class GraphUtils {
     static final int BLACK = 2;
 
     public static String lastError = null;
+
+    public static ModifiableGraph read(Reader r) throws IOException {
+        try {
+            ModifiableGraph g = new ModifiableGraph();
+            BufferedReader br = new BufferedReader(r);
+            String[] words = br.readLine().split("\\s*");
+            int nNodes = Integer.parseInt(words[0]);
+            for (int i = 0; i < nNodes; i++) {
+                g.addNode(i);
+                words = br.readLine().split("[\\s:]*");
+                for (int j = 0; j < words.length; j += 2) {
+                    g.addEdge(i, Integer.parseInt(words[j]), Double.parseDouble(words[j + 1]));
+                }
+            }
+            br.close();
+            r.close();
+            return g;
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+            throw new IOException("GridGraph can not read graph: " + e.getMessage());
+        }
+    }
 
     public static boolean valid(Graph g, int startNode) {
         if (g == null || g.getNumNodes() < 1 || startNode < 0 || startNode >= g.getNumNodes()) {
@@ -475,8 +500,6 @@ public class GraphUtils {
                 }
             }
         }
-
-printArray( p );
 
         return new AllGraphPaths(d, p);
     }
