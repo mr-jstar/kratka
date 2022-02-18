@@ -1,6 +1,6 @@
 package kratka;
 
-import graphs.AllGraphPaths;
+import graphs.AllToAllGraphPaths;
 import graphs.Graph;
 import graphs.GridGraph;
 import graphs.Edge;
@@ -79,7 +79,7 @@ public class Kratka extends Application {
     private int plotHeight = DEFAULTHEIGHT;
 
     private SingleSourceGraphPaths pathsSS = null;
-    private AllGraphPaths pathsAll = null;
+    private AllToAllGraphPaths pathsAll = null;
     private Graph mst = null;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();

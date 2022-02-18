@@ -465,7 +465,7 @@ public class GraphUtils {
         }
     }
 
-    public static AllGraphPaths floydWarshall(Graph g) {
+    public static AllToAllGraphPaths floydWarshall(Graph g) {
         if (g == null || g.getNumNodes() < 1) {
             return null;
         }
@@ -501,6 +501,6 @@ public class GraphUtils {
             }
         }
 
-        return new AllGraphPaths(d, p);
+        return new AllToAllGraphPaths(d, p);
     }
 }

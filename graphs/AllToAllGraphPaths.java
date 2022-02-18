@@ -5,14 +5,14 @@ package graphs;
  *
  * @author jstar
  */
-public class AllGraphPaths {
+public class AllToAllGraphPaths {
 
     public double[][] d;
     public int[][] p;
     public double minDist, maxDist;
     public int sMin, dMin, sMax, dMax;
 
-    public AllGraphPaths(double[][] d, int[][] p) {
+    public AllToAllGraphPaths(double[][] d, int[][] p) {
         if (d.length < 1 || d.length != p.length || d[0].length != p[0].length) {
             throw new IllegalArgumentException("AllGraphPaths constructor: distance and precedessor arrays are not compatible!");
         }
